@@ -1,6 +1,6 @@
 defmodule DocusignEx.Api.Auth do
   @moduledoc """
-  Login with Docusign api
+  Login con el API de Docusign
   """
 
   require Logger
