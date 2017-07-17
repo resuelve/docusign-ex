@@ -18,7 +18,7 @@ defmodule DocusignEx.Mixfile do
   defp deps do
     [
       {:httpoison,    "~> 0.11.1"},
-      {:poison,       "~> 3.0.0"},
+      {:poison,       "~> 2.1 or ~> 3.1"},
       {:exprintf,     github: "parroty/exprintf"},
       {:excoveralls,  "~> 0.6.3", only: :test},
     ]
