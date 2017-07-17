@@ -1,4 +1,7 @@
 defmodule DocusignEx.Api.Envelope do
+  @doc """
+  Manejo de apis relacionadas a los sobres de Docusign
+  """
 
   alias DocusignEx.Api.Base
   alias HTTPoison.Response
