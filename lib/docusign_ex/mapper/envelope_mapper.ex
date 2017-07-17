@@ -10,7 +10,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   """
   @spec map(map) :: map
   def map(envelope_data) do
-    envelope = %{status: "sent"}
+    envelope = %{"status" => "sent"}
 
     envelope
     |> add_subject(envelope_data)
@@ -25,7 +25,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   def add_subject(envelope, data) do
     Map.put(
       envelope,
-      :emailSubject,
+      "emailSubject",
       Map.get(data, "subject", "")
     )
   end
@@ -43,7 +43,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
           end
       )
 
-    Map.put(envelope, :documents, documents)
+    Map.put(envelope, "documents", documents)
   end
 
   @doc """
@@ -71,10 +71,10 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   @spec extract_document_data(String.t, integer) :: map
   def extract_document_data(pdf_path, id) do
     %{
-      documentBase64: FileUtils.encode64(pdf_path),
-      documentId: Integer.to_string(id),
-      fileExtension: FileUtils.get_extension(pdf_path),
-      name: FileUtils.get_filename(pdf_path)
+      "documentBase64" => FileUtils.encode64(pdf_path),
+      "documentId" => Integer.to_string(id),
+      "fileExtension" => FileUtils.get_extension(pdf_path),
+      "name" => FileUtils.get_filename(pdf_path)
     }
   end
 
@@ -83,7 +83,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   """
   @spec add_signers(map, map) :: map
   def add_signers(envelope, data) do
-    envelope = Map.put(envelope, :recipients, %{})
+    envelope = Map.put(envelope, "recipients", %{})
     signers_list = Map.get(data, "signers", [])
 
     {signers, _} =
@@ -106,18 +106,18 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
 
         {
           %{
-            email: Map.get(signer, "email"),
-            name: Map.get(signer, "name"),
-            recipientId: acc,
-            routingOrder: acc,
-            tabs: tabs
+            "email" => Map.get(signer, "email"),
+            "name" => Map.get(signer, "name"),
+            "recipientId" => acc,
+            "routingOrder" => acc,
+            "tabs" => tabs
           },
           acc + 1
         } 
       end
       )
 
-    put_in(envelope, [:recipients, :signers], signers)
+    put_in(envelope, ["recipients", "signers"], signers)
   end
 
   @doc """
@@ -156,17 +156,17 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
 
     formatted_tabs =
       !is_nil(date_signed_tabs) && 
-      Map.put(formatted_tabs, :dateSignedTabs, date_signed_tabs) ||
+      Map.put(formatted_tabs, "dateSignedTabs", date_signed_tabs) ||
       formatted_tabs
     
     formatted_tabs =
       !is_nil(full_name_tabs) &&
-      Map.put(formatted_tabs, :fullNameTabs, full_name_tabs) ||
+      Map.put(formatted_tabs, "fullNameTabs", full_name_tabs) ||
       formatted_tabs
     
     formatted_tabs =
       !is_nil(sign_here_tabs) &&
-      Map.put(formatted_tabs, :signHereTabs, sign_here_tabs) ||
+      Map.put(formatted_tabs, "signHereTabs", sign_here_tabs) ||
       formatted_tabs
 
     formatted_tabs
@@ -178,8 +178,8 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   defp add_recipient_document_id(tabs, document_id, recipient_id) do
     Enum.map(tabs, fn(tab) ->
       tab
-      |> Map.put(:recipientId, Integer.to_string(recipient_id))
-      |> Map.put(:documentId, Integer.to_string(document_id))
+      |> Map.put("recipientId", Integer.to_string(recipient_id))
+      |> Map.put("documentId", Integer.to_string(document_id))
       end
     )
   end
