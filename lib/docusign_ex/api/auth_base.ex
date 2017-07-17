@@ -1,6 +1,6 @@
 defmodule DocusignEx.Api.AuthBase do
   @moduledoc """
-  Provides basic and common functionalities for Docusign API
+  Funcionalidades básicas y comunes del API del Docusign
   """
 
   @auth_header "{\"Username\":\"%s\",\"Password\":\"%s\",\"IntegratorKey\": \"%s\"}"
