@@ -23,7 +23,9 @@ defmodule DocusignEx.Api.Auth do
   end
 
   def get_base_url(body) do
-    [data] = Map.get(body, "loginAccounts")
-    Map.get(data, "baseUrl")
+    body
+    |> Map.get("loginAccounts")
+    |> Enum.filter(fn account -> account["isDefault"] == "true" end)
+    |> Enum.reduce("", fn (account, _acc) -> Map.get(account, "baseUrl") end)
   end
 end
