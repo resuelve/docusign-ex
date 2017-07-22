@@ -7,7 +7,7 @@ defmodule DocusignEx.Api.AuthBase do
 
   use HTTPoison.Base
 
-  def api, do: "https://demo.docusign.net/restapi/v2"
+  def api, do: Application.get_env(:docusign_ex, :host)
   defp process_url(url), do: api() <> url
   defp process_request_body(body), do: Poison.encode!(body)
 

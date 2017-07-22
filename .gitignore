@@ -21,8 +21,7 @@ erl_crash.dump
 
 .idea
 
-config/
-
 *.iml
 
 .DS_Store
+.env

@@ -9,6 +9,10 @@ defmodule DocusignEx.Api.Auth do
   alias HTTPoison.Response
   alias HTTPoison.Error
 
+  @doc """
+  Login
+  """
+  @spec login :: (String.t | :ok)
   def login() do
     response = AuthBase.get("/login_information?api_password=true")
 
@@ -22,9 +26,16 @@ defmodule DocusignEx.Api.Auth do
     end
   end
 
-  def get_base_url(body) do
-    body
-    |> Map.get("loginAccounts")
+  @doc """
+  Obtiene la url base para el acceso por API
+  """
+  @spec get_base_url(map) :: String.t
+  def get_base_url(%{"errorCode" => code, "message" => message}) do
+    Logger.error "#{code}: #{message}"
+    ""
+  end
+  def get_base_url(%{"loginAccounts" => accounts}) do
+    accounts
     |> Enum.filter(fn account -> account["isDefault"] == "true" end)
     |> Enum.reduce("", fn (account, _acc) -> Map.get(account, "baseUrl") end)
   end
