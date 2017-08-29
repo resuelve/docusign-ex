@@ -21,6 +21,7 @@ defmodule DocusignEx.Mixfile do
       {:poison,       "~> 2.1 or ~> 3.1"},
       {:exprintf,     github: "parroty/exprintf"},
       {:excoveralls,  "~> 0.6.3", only: :test},
+      {:credo, "~> 0.8.6", only: :test}
     ]
   end
 end

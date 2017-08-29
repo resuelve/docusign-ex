@@ -23,6 +23,15 @@ defmodule DocusignEx.Mapper.EnvelopeMapperTest do
               "recipientId" => 1,
               "routingOrder" => 1,
               "tabs" => %{
+                "initialHereTabs" => [
+                  %{
+                    "documentId" => "1",
+                    "recipientId" => "1",
+                    "pageNumber" => "1",
+                    "xPosition" => "20",
+                    "yPosition" => "20"
+                  }
+                ],
                 "dateSignedTabs" => [
                   %{
                     "documentId" => "1",
@@ -39,6 +48,15 @@ defmodule DocusignEx.Mapper.EnvelopeMapperTest do
                     "yPosition" => "10"
                   }
                 ],
+                "fullNameTabs" => [
+                  %{
+                    "documentId" => "1",
+                    "recipientId" => "1",
+                    "pageNumber" => "1",
+                    "xPosition" => "10",
+                    "yPosition" => "100"
+                  }
+                ],
                 "signHereTabs" => [
                   %{
                     "documentId" => "1",
@@ -52,7 +70,8 @@ defmodule DocusignEx.Mapper.EnvelopeMapperTest do
             }
           ]
         },
-        "status" => "sent"
+        "status" => "sent",
+        "eventNotification" => nil
       },
       json: %{
         "subject" => "Test",
@@ -87,6 +106,13 @@ defmodule DocusignEx.Mapper.EnvelopeMapperTest do
                     %{
                       "xPosition" => "25",
                       "yPosition" => "62",
+                      "pageNumber" => "1"
+                    }
+                  ],
+                  "initialHereTabs" => [
+                    %{
+                      "xPosition" => "20",
+                      "yPosition" => "20",
                       "pageNumber" => "1"
                     }
                   ]
