@@ -145,8 +145,4 @@ defmodule DocusignEx.Mapper.EnvelopeMapperTest do
       ]
     }
   end
-
-  test "Should format tabs" do
-    assert format_tabs(%{}, 1, 1) == %{}
-  end
 end

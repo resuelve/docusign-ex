@@ -94,7 +94,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
           |> Map.get("documents")
           |> Enum.map(fn document ->
             id = get_document_id(data, Map.get(document, "path"))
-            format_tabs(Map.get(document, "tabs"), id + 1, acc)
+            add_tabs(Map.get(document, "tabs"), id + 1, acc)
             end
           )
           |> Enum.reduce(%{}, fn(tab, acc) ->
@@ -132,20 +132,33 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   end
 
   @doc """
-  Agrega a los tabs el recipientId y el documentId correspondientes
+  Agrega los tabs al envelope
   """
-  @spec format_tabs(map, integer, integer) :: map
-  def format_tabs(nil, _, _), do: nil
-  def format_tabs(tabs, document_id, recipient_id) do
+  @spec add_tabs(map, integer, integer) :: map
+  def add_tabs(nil, _, _), do: nil
+  def add_tabs(tabs, document_id, recipient_id) do
     tabs
     |> Map.keys
     |> Enum.reduce(%{},
       fn key, acc ->
-        add_tabs(acc, tabs, document_id, recipient_id, key)
+        do_add_tabs(acc, tabs, document_id, recipient_id, key)
       end)
   end
 
-  # Realiza el put a el recipientId y el documentId
+  # Agrega los tabs a la lista
+  @spec do_add_tabs(list, map, integer, integer, String.t) :: map
+  defp do_add_tabs(tabs, tabs_data, doc_id, recipient_id, tab_label) do
+    tabs_to_add =
+      tabs_data
+      |> Map.get(tab_label)
+      |> add_recipient_document_id(doc_id, recipient_id)
+
+    !is_nil(tabs_to_add) && 
+    Map.put(tabs, tab_label, tabs_to_add) ||
+    tabs
+  end
+
+  # Agrega el recipientId y el documentId a cada Tab
   @spec add_recipient_document_id(list, integer, integer) :: list
   defp add_recipient_document_id(nil, _, _), do: nil
   defp add_recipient_document_id(tabs, document_id, recipient_id) do
@@ -157,17 +170,8 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
     )
   end
 
-  defp add_tabs(tabs, tabs_data, doc_id, recipient_id, tab_label) do
-    tabs_to_add =
-      tabs_data
-      |> Map.get(tab_label)
-      |> add_recipient_document_id(doc_id, recipient_id)
-
-    !is_nil(tabs_to_add) && 
-    Map.put(tabs, tab_label, tabs_to_add) ||
-    tabs
-  end
-
+  # Agrega los datos del webhook al envelope
+  @spec add_webhook(map, map) :: map
   def add_webhook(envelope, data) do
     Map.put(envelope, "eventNotification", Map.get(data, "eventNotification"))
   end
