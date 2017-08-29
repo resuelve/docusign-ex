@@ -1,5 +1,5 @@
 defmodule DocusignEx.Api.Envelope do
-  @doc """
+  @moduledoc """
   Manejo de apis relacionadas a los sobres de Docusign
   """
 

@@ -16,6 +16,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
     |> add_subject(envelope_data)
     |> add_documents(envelope_data)
     |> add_signers(envelope_data)
+    |> add_webhook(envelope_data)
   end
 
   @doc """
@@ -53,7 +54,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   def get_document_list(data) do
     data
     |> Map.get("signers")
-    |> Enum.reduce([], fn (signer,acc) ->
+    |> Enum.reduce([], fn (signer, acc) ->
       signer
       |> Map.get("documents")
       |> Enum.map(fn document ->
@@ -93,7 +94,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
           |> Map.get("documents")
           |> Enum.map(fn document ->
             id = get_document_id(data, Map.get(document, "path"))
-            format_tabs(Map.get(document, "tabs"), id+1, acc)
+            add_tabs(Map.get(document, "tabs"), id + 1, acc)
             end
           )
           |> Enum.reduce(%{}, fn(tab, acc) ->
@@ -131,48 +132,33 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   end
 
   @doc """
-  Agrega a los tabs el recipientId y el documentId correspondientes
+  Agrega los tabs al envelope
   """
-  @spec format_tabs(list, integer, integer) :: map
-  def format_tabs(nil, _, _), do: nil
-  def format_tabs(tabs, document_id, recipient_id) do
-    formatted_tabs = %{}
-
-    date_signed_tabs =
-      tabs
-      |> Map.get("dateSignedTabs")
-      |> add_recipient_document_id(document_id, recipient_id)
-
-    full_name_tabs =
-      tabs
-      |> Map.get("fullNameTabs")
-      |> add_recipient_document_id(document_id, recipient_id)
-
-    sign_here_tabs =
-      tabs
-      |> Map.get("signHereTabs")
-      |> add_recipient_document_id(document_id, recipient_id)
-
-
-    formatted_tabs =
-      !is_nil(date_signed_tabs) && 
-      Map.put(formatted_tabs, "dateSignedTabs", date_signed_tabs) ||
-      formatted_tabs
-    
-    formatted_tabs =
-      !is_nil(full_name_tabs) &&
-      Map.put(formatted_tabs, "fullNameTabs", full_name_tabs) ||
-      formatted_tabs
-    
-    formatted_tabs =
-      !is_nil(sign_here_tabs) &&
-      Map.put(formatted_tabs, "signHereTabs", sign_here_tabs) ||
-      formatted_tabs
-
-    formatted_tabs
+  @spec add_tabs(map, integer, integer) :: map
+  def add_tabs(nil, _, _), do: nil
+  def add_tabs(tabs, document_id, recipient_id) do
+    tabs
+    |> Map.keys
+    |> Enum.reduce(%{},
+      fn key, acc ->
+        do_add_tabs(acc, tabs, document_id, recipient_id, key)
+      end)
   end
 
-  # Realiza el put a el recipientId y el documentId
+  # Agrega los tabs a la lista
+  @spec do_add_tabs(list, map, integer, integer, String.t) :: map
+  defp do_add_tabs(tabs, tabs_data, doc_id, recipient_id, tab_label) do
+    tabs_to_add =
+      tabs_data
+      |> Map.get(tab_label)
+      |> add_recipient_document_id(doc_id, recipient_id)
+
+    !is_nil(tabs_to_add) && 
+    Map.put(tabs, tab_label, tabs_to_add) ||
+    tabs
+  end
+
+  # Agrega el recipientId y el documentId a cada Tab
   @spec add_recipient_document_id(list, integer, integer) :: list
   defp add_recipient_document_id(nil, _, _), do: nil
   defp add_recipient_document_id(tabs, document_id, recipient_id) do
@@ -182,5 +168,11 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
       |> Map.put("documentId", Integer.to_string(document_id))
       end
     )
+  end
+
+  # Agrega los datos del webhook al envelope
+  @spec add_webhook(map, map) :: map
+  def add_webhook(envelope, data) do
+    Map.put(envelope, "eventNotification", Map.get(data, "eventNotification"))
   end
 end
