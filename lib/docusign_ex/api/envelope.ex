@@ -29,7 +29,7 @@ defmodule DocusignEx.Api.Envelope do
     envelope = EnvelopeMapper.map(envelope_data)
     
     "/envelopes"
-    |> Base.post(envelope)
+    |> Base.post(envelope, [], [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000])
     |> parse_envelope()
   end
 
