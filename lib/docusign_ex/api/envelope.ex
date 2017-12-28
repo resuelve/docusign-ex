@@ -39,12 +39,12 @@ defmodule DocusignEx.Api.Envelope do
     body: body,
     headers: headers,
     status_code: 201}}) do
-    body
+      {:ok, body}
   end
-  defp parse_envelope(error) do
-    Logger.info "Error Docusign - #{inspect(error)}"
-    error
-  end
+  defp parse_envelope({:ok, %Response{body: body}}), do: {:error, body}
+  defp parse_envelope(_), do: {:error, %{
+    "errorCode" => "Unknow",
+    "message" => "Unknow error"}}
 
   @doc """
   Crea una plantilla
