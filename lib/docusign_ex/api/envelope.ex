@@ -27,7 +27,7 @@ defmodule DocusignEx.Api.Envelope do
   @spec send_envelope(map) :: map
   def send_envelope(envelope_data) do
     envelope = EnvelopeMapper.map(envelope_data)
-    
+
     "/envelopes"
     |> Base.post(envelope, [], [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000])
     |> parse_envelope()
@@ -39,6 +39,10 @@ defmodule DocusignEx.Api.Envelope do
     headers: headers,
     status_code: 201}}) do
     body
+  end
+  defp parse_envelope(error) do
+    Logger.info "Error Docusign - #{inspect(error)}"
+    error
   end
 
   @doc """
