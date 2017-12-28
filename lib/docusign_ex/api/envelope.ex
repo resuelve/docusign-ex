@@ -3,6 +3,7 @@ defmodule DocusignEx.Api.Envelope do
   Manejo de apis relacionadas a los sobres de Docusign
   """
 
+  require Logger
   alias DocusignEx.Api.Base
   alias HTTPoison.Response
   alias HTTPoison.Error
