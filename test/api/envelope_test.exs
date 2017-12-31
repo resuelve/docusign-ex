@@ -1,0 +1,101 @@
+defmodule DocusignEx.Api.EnvelopeTest do
+  use ExUnit.Case
+
+  import Mock
+  alias DocusignEx.Api.Envelope
+
+  setup do
+    [
+      json: %{
+        "subject" => "Test",
+        "signers" => [
+          %{
+            "name" => "Name",
+            "email" => "email@email.com",
+            "documents" => [
+              %{
+                "path" => "test/utils/test64.txt",
+                "tabs" => %{
+                  "dateSignedTabs" => [
+                    %{
+                      "xPosition" => "32",
+                      "yPosition" => "75",
+                      "pageNumber" => "1"
+                    },
+                    %{
+                      "xPosition" => "62",
+                      "yPosition" => "10",
+                      "pageNumber" => "1"
+                    }
+                  ],
+                  "fullNameTabs" => [
+                    %{
+                      "xPosition" => "10",
+                      "yPosition" => "100",
+                      "pageNumber" => "1"
+                    }
+                  ],
+                  "signHereTabs" => [
+                    %{
+                      "xPosition" => "25",
+                      "yPosition" => "62",
+                      "pageNumber" => "1"
+                    }
+                  ],
+                  "initialHereTabs" => [
+                    %{
+                      "xPosition" => "20",
+                      "yPosition" => "20",
+                      "pageNumber" => "1"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  end
+
+  test "send_envelope/1 returns ok response", data do
+    with_mocks([
+      {
+        DocusignEx.Api.Base,
+        [],
+        [
+          post: fn(_, _, _, _) ->
+            {:ok, %HTTPoison.Response{
+              body: %{"envelopeId" => "123"}, headers: [], status_code: 201}}
+          end
+        ]
+      }
+    ]) do
+      assert Envelope.send_envelope(data.json) ==
+        {:ok, %{"envelopeId" => "123"}}
+    end
+  end
+
+  test "send_envelope/1 returns error response", data do
+    with_mocks([
+      {
+        DocusignEx.Api.Base,
+        [],
+        [
+          post: fn(_, _, _, _) ->
+            {:ok, %HTTPoison.Response{
+              body: %{
+                "errorCode" => "INVALID_EMAIL_ADDRESS_FOR_RECIPIENT",
+                "message" => "The email address for the recipient is invalid. The recipient Id follows."
+              }, headers: [], status_code: 400}}
+          end
+        ]
+      }
+    ]) do
+      assert Envelope.send_envelope(data.json) ==
+        {:error, %{
+          "errorCode" => "INVALID_EMAIL_ADDRESS_FOR_RECIPIENT",
+          "message" => "The email address for the recipient is invalid. The recipient Id follows."}}
+    end
+  end
+end

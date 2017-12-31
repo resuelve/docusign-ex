@@ -3,6 +3,7 @@ defmodule DocusignEx.Api.Envelope do
   Manejo de apis relacionadas a los sobres de Docusign
   """
 
+  require Logger
   alias DocusignEx.Api.Base
   alias HTTPoison.Response
   alias HTTPoison.Error
@@ -27,7 +28,7 @@ defmodule DocusignEx.Api.Envelope do
   @spec send_envelope(map) :: map
   def send_envelope(envelope_data) do
     envelope = EnvelopeMapper.map(envelope_data)
-    
+
     "/envelopes"
     |> Base.post(envelope, [], [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000])
     |> parse_envelope()
@@ -38,8 +39,12 @@ defmodule DocusignEx.Api.Envelope do
     body: body,
     headers: headers,
     status_code: 201}}) do
-    body
+      {:ok, body}
   end
+  defp parse_envelope({:ok, %Response{body: body}}), do: {:error, body}
+  defp parse_envelope(_), do: {:error, %{
+    "errorCode" => "Unknown",
+    "message" => "Unknown error"}}
 
   @doc """
   Crea una plantilla
