@@ -32,7 +32,7 @@ defmodule DocusignEx.Api.Envelope do
 
     "/envelopes"
     |> Base.post(envelope, [], [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000])
-    |> parse_envelope()
+    |> parse_send_envelope()
   end
 
   @spec get_envelope(String.t()) :: map
@@ -56,15 +56,15 @@ defmodule DocusignEx.Api.Envelope do
        )
   end
 
-  @spec parse_envelope({:ok, %Response{}}) :: map()
-  defp parse_envelope({:ok, %Response{
+  @spec parse_send_envelope({:ok, %Response{}}) :: map()
+  defp parse_send_envelope({:ok, %Response{
     body: body,
     headers: headers,
     status_code: 201}}) do
       {:ok, body}
   end
-  defp parse_envelope({:ok, %Response{body: body}}), do: {:error, body}
-  defp parse_envelope(_), do: {:error, %{
+  defp parse_send_envelope({:ok, %Response{body: body}}), do: {:error, body}
+  defp parse_send_envelope(_), do: {:error, %{
     "errorCode" => "Unknown",
     "message" => "Unknown error"}}
 
