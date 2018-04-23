@@ -36,9 +36,12 @@ defmodule DocusignEx.Api.Envelope do
          [],
          [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000]
        )
-    |> parse_post_response()
+    |> _parse_post_response()
   end
 
+  @doc """
+  Obtiene la información de un sobre de docusign
+  """
   @spec get_envelope(String.t()) :: map
   def get_envelope(envelope_uid) do
     "/envelopes/#{envelope_uid}"
@@ -46,9 +49,12 @@ defmodule DocusignEx.Api.Envelope do
          [],
          [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000]
        )
-    |> parse_get_response()
+    |> _parse_get_response()
   end
 
+  @doc """
+  Obtiene la lista de documentos asociados a un sobre de docusign
+  """
   @spec get_documents(String.t()) :: map
   def get_documents(envelope_uid) do
     "/envelopes/#{envelope_uid}/documents"
@@ -56,9 +62,12 @@ defmodule DocusignEx.Api.Envelope do
          [],
          [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000]
        )
-    |> parse_get_response()
+    |> _parse_get_response()
   end
 
+  @doc """
+  Devuelve el stream de datos de un documento
+  """
   @spec download_document(String.t, String.t) :: map
   def download_document(envelope_uid, document_id) do
     "/envelopes/#{envelope_uid}/documents/#{document_id}"
@@ -66,10 +75,11 @@ defmodule DocusignEx.Api.Envelope do
          [],
          [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000]
        )
+       |> _parse_download_response()
   end
 
-  @spec parse_post_response({:ok, %Response{}}) :: map()
-  defp parse_post_response(
+  @spec _parse_post_response({:ok, %Response{}}) :: map()
+  defp _parse_post_response(
          {
            :ok,
            %Response{
@@ -81,20 +91,35 @@ defmodule DocusignEx.Api.Envelope do
        ) do
     {:ok, body}
   end
-  defp parse_post_response({:ok, %Response{body: body}}), do: {:error, body}
-  defp parse_post_response(_), do: {:error, %{
+  defp _parse_post_response({:ok, %Response{body: body}}), do: {:error, body}
+  defp _parse_post_response(_), do: {:error, %{
     "errorCode" => "Unknown",
     "message" => "Unknown error"
   }}
 
-  @spec parse_get_response(tuple) :: tuple
-  def parse_get_response({:ok, %Response{body: body, status_code: 200}}) do
+  @spec _parse_get_response(tuple) :: tuple
+  defp _parse_get_response({:ok, %Response{body: body, status_code: 200}}) do
     {:ok, body}
   end
-  def parse_get_response(error) do
+  defp _parse_get_response(error) do
     Logger.error(
       "No se pudo obtener información del paquete, #{inspect(error)}"
     )
-    {:error, "Error al obtener el paquete de docusign"}
+    {:error, "El paquete no existe o no se puede acceder en este momento"}
+  end
+
+  @spec _parse_download_response(tuple) :: tuple
+  defp _parse_download_response(
+         {:ok, %Response{body: body, headers: headers, status_code: 200}}
+       ) do
+    IO.inspect(headers)
+    IO.inspect(body)
+    {:ok, body}
+  end
+  defp _parse_download_response(error) do
+    Logger.error(
+      "No se pudo obtener información documento, #{inspect(error)}"
+    )
+    {:error, "El documento no existe o no tiene el formato correcto"}
   end
 end
