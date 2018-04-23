@@ -34,6 +34,13 @@ defmodule DocusignEx.Api.Envelope do
     |> parse_envelope()
   end
 
+  @spec get_envelope(String.t()) :: map
+  def get_envelope(envelope_uid) do
+    "/envelopes/#{envelope_uid}"
+    |> Base.get([], [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000])
+    |> parse_envelope()
+  end
+
   @spec parse_envelope({:ok, %Response{}}) :: map()
   defp parse_envelope({:ok, %Response{
     body: body,
