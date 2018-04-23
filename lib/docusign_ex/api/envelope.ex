@@ -38,14 +38,18 @@ defmodule DocusignEx.Api.Envelope do
   def get_envelope(envelope_uid) do
     "/envelopes/#{envelope_uid}"
     |> Base.get([], [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000])
-    |> parse_envelope()
   end
 
   @spec get_documents(String.t()) :: map
   def get_documents(envelope_uid) do
     "/envelopes/#{envelope_uid}/documents"
     |> Base.get([], [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000])
-    |> parse_envelope()
+  end
+
+  @spec get_document(String.t, String.t) :: map
+  def get_document(envelope_uid, document_id) do
+    "/envelopes/#{envelope_uid}/documents/#{document_id}"
+    |> Base.get([], [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000])
   end
 
   @spec parse_envelope({:ok, %Response{}}) :: map()
