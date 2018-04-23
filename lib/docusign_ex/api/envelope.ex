@@ -31,20 +31,32 @@ defmodule DocusignEx.Api.Envelope do
     envelope = EnvelopeMapper.map(envelope_data)
 
     "/envelopes"
-    |> Base.post(envelope, [], [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000])
-    |> parse_send_envelope()
+    |> Base.post(
+         envelope,
+         [],
+         [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000]
+       )
+    |> parse_post_response()
   end
 
   @spec get_envelope(String.t()) :: map
   def get_envelope(envelope_uid) do
     "/envelopes/#{envelope_uid}"
-    |> Base.get([], [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000])
+    |> Base.get(
+         [],
+         [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000]
+       )
+    |> parse_get_response()
   end
 
   @spec get_documents(String.t()) :: map
   def get_documents(envelope_uid) do
     "/envelopes/#{envelope_uid}/documents"
-    |> Base.get([], [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000])
+    |> Base.get(
+         [],
+         [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000]
+       )
+    |> parse_get_response()
   end
 
   @spec download_document(String.t, String.t) :: map
@@ -56,23 +68,33 @@ defmodule DocusignEx.Api.Envelope do
        )
   end
 
-  @spec parse_send_envelope({:ok, %Response{}}) :: map()
-  defp parse_send_envelope({:ok, %Response{
-    body: body,
-    headers: headers,
-    status_code: 201}}) do
-      {:ok, body}
+  @spec parse_post_response({:ok, %Response{}}) :: map()
+  defp parse_post_response(
+         {
+           :ok,
+           %Response{
+             body: body,
+             headers: headers,
+             status_code: 201
+           }
+         }
+       ) do
+    {:ok, body}
   end
-  defp parse_send_envelope({:ok, %Response{body: body}}), do: {:error, body}
-  defp parse_send_envelope(_), do: {:error, %{
+  defp parse_post_response({:ok, %Response{body: body}}), do: {:error, body}
+  defp parse_post_response(_), do: {:error, %{
     "errorCode" => "Unknown",
-    "message" => "Unknown error"}}
+    "message" => "Unknown error"
+  }}
 
-  @doc """
-  Crea una plantilla
-  """
-  @spec create_template(map) :: map
-  def create_template(data) do
-    Base.post("/templates", data)
+  @spec parse_get_response(tuple) :: tuple
+  def parse_get_response({:ok, %Response{body: body, status_code: 200}}) do
+    {:ok, body}
+  end
+  def parse_get_response(error) do
+    Logger.error(
+      "No se pudo obtener información del paquete, #{inspect(error)}"
+    )
+    {:error, "Error al obtener el paquete de docusign"}
   end
 end
