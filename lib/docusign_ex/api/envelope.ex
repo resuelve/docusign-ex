@@ -104,7 +104,7 @@ defmodule DocusignEx.Api.Envelope do
            :ok,
            %Response{
              body: body,
-             headers: headers,
+             headers: _headers,
              status_code: 201
            }
          }
