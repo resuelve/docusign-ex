@@ -112,14 +112,22 @@ defmodule DocusignEx.Api.Envelope do
   defp _parse_download_response(
          {:ok, %Response{body: body, headers: headers, status_code: 200}}
        ) do
-    IO.inspect(headers)
-    IO.inspect(body)
-    {:ok, body}
+    if Enum.find(
+      headers,
+      fn {header_name, header_value} -> header_name == "Content-Type" and
+                                        header_value == "application/pdf"
+      end
+       ) do
+      {:ok, body}
+    else
+      {:error, "El documento no es un PDF"}
+    end
+
   end
   defp _parse_download_response(error) do
     Logger.error(
       "No se pudo obtener información documento, #{inspect(error)}"
     )
-    {:error, "El documento no existe o no tiene el formato correcto"}
+    {:error, "El documento no existe o no se puede acceder en este momento"}
   end
 end
