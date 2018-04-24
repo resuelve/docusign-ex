@@ -10,6 +10,10 @@ defmodule DocusignEx.Api.Envelope do
   alias HTTPoison.Error
   alias DocusignEx.Mapper.EnvelopeMapper
 
+  @connect_timeout 100000
+  @recv_timeout 100000
+  @timeout 100000
+
   @doc """
   Envia un documento para que el remitente pueda firmarlo.
 
@@ -34,7 +38,11 @@ defmodule DocusignEx.Api.Envelope do
     |> Base.post(
          envelope,
          [],
-         [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000]
+         [
+           connect_timeout: @connect_timeout,
+           recv_timeout: @recv_timeout,
+           timeout: @timeout
+         ]
        )
     |> _parse_post_response()
   end
@@ -47,7 +55,11 @@ defmodule DocusignEx.Api.Envelope do
     "/envelopes/#{envelope_uid}"
     |> Base.get(
          [],
-         [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000]
+         [
+           connect_timeout: @connect_timeout,
+           recv_timeout: @recv_timeout,
+           timeout: @timeout
+         ]
        )
     |> _parse_get_response()
   end
@@ -60,7 +72,11 @@ defmodule DocusignEx.Api.Envelope do
     "/envelopes/#{envelope_uid}/documents"
     |> Base.get(
          [],
-         [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000]
+         [
+           connect_timeout: @connect_timeout,
+           recv_timeout: @recv_timeout,
+           timeout: @timeout
+         ]
        )
     |> _parse_get_response()
   end
@@ -73,9 +89,13 @@ defmodule DocusignEx.Api.Envelope do
     "/envelopes/#{envelope_uid}/documents/#{document_id}"
     |> DownloadFile.get(
          [],
-         [connect_timeout: 100000, recv_timeout: 100000, timeout: 100000]
+         [
+           connect_timeout: @connect_timeout,
+           recv_timeout: @recv_timeout,
+           timeout: @timeout
+         ]
        )
-       |> _parse_download_response()
+    |> _parse_download_response()
   end
 
   @spec _parse_post_response({:ok, %Response{}}) :: map()
@@ -113,10 +133,10 @@ defmodule DocusignEx.Api.Envelope do
          {:ok, %Response{body: body, headers: headers, status_code: 200}}
        ) do
     if Enum.find(
-      headers,
-      fn {header_name, header_value} -> header_name == "Content-Type" and
-                                        header_value == "application/pdf"
-      end
+         headers,
+         fn {header_name, header_value} -> header_name == "Content-Type" and
+                                           header_value == "application/pdf"
+         end
        ) do
       {:ok, body}
     else
