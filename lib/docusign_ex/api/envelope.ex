@@ -36,6 +36,23 @@ defmodule DocusignEx.Api.Envelope do
   end
 
   @doc """
+  Actualiza un sobre por medio del uid
+
+  ## Ejemplos
+    iex> data = %{"status" => "voided" =>, "voidedReason" => "The reason"}
+    iex> DocusignEx.Api.Envelope.send_envelope(data)
+    %{
+      "message" => "SUCCESSS"
+    }
+  """
+  @spec update_envelope(String.t, map) :: map
+  def update_envelope(envelope_uid, data) do
+    "/envelopes/#{envelope_uid}"
+    |> Base.put(data)
+    |> _parse_get_response()
+  end
+
+  @doc """
   Obtiene la información de un sobre de docusign
   """
   @spec get_envelope(String.t()) :: map
