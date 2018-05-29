@@ -4,12 +4,23 @@ defmodule DocusignEx.Api.Base do
   """
 
   @auth_header "{\"Username\":\"%s\",\"Password\":\"%s\",\"IntegratorKey\": \"%s\"}"
+  @connect_timeout 100000
+  @recv_timeout 100000
+  @timeout 100000
 
   use HTTPoison.Base
 
   def api, do: Process.get("base_url")
   defp process_url(url), do: api() <> url
   defp process_request_body(body), do: Poison.encode!(body)
+
+  defp process_request_options(options) do
+    [
+      connect_timeout: @connect_timeout,
+      recv_timeout: @recv_timeout,
+      timeout: @timeout
+    ]
+  end
 
   defp process_request_headers(headers) do
     username = Application.get_env(:docusign_ex, :username)
@@ -20,7 +31,7 @@ defmodule DocusignEx.Api.Base do
     [
       {"X-DocuSign-Authentication", auth_headers},
       {"Content-Type", "application/json"},
-    ]
+    ] ++ headers
   end
 
   defp process_response_body(body) do
