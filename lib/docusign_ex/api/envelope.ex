@@ -10,10 +10,6 @@ defmodule DocusignEx.Api.Envelope do
   alias HTTPoison.Error
   alias DocusignEx.Mapper.EnvelopeMapper
 
-  @connect_timeout 100000
-  @recv_timeout 100000
-  @timeout 100000
-
   @doc """
   Envia un documento para que el remitente pueda firmarlo.
 
@@ -22,7 +18,7 @@ defmodule DocusignEx.Api.Envelope do
         "subject" => "Test",
         "signers" => [...]
       }
-      iex> DocusignEx.Api.Envelope(data)
+      iex> DocusignEx.Api.Envelope.send_envelope(data)
       %{
         "envelopeId" => "5aadc814-53be-4a03-8590-6cf381faa163",
         "status" => "sent",
@@ -35,16 +31,26 @@ defmodule DocusignEx.Api.Envelope do
     envelope = EnvelopeMapper.map(envelope_data)
 
     "/envelopes"
-    |> Base.post(
-         envelope,
-         [],
-         [
-           connect_timeout: @connect_timeout,
-           recv_timeout: @recv_timeout,
-           timeout: @timeout
-         ]
-       )
+    |> Base.post(envelope)
     |> _parse_post_response()
+  end
+
+  @doc """
+  Actualiza un sobre por medio del uid
+
+  ## Ejemplos
+    iex> data = %{"status" => "voided" =>, "voidedReason" => "The reason"}
+    iex> envelope_uid = "2a4674c5-4fd4-47b0-9af0-89970dd8e6c9"
+    iex> DocusignEx.Api.Envelope.send_envelope(envelope_uid, data)
+    {
+      :ok, %{"envelopeId" => "2a4674c5-4fd4-47b0-9af0-89970dd8e6c9"}
+    }
+  """
+  @spec update_envelope(String.t, map) :: map
+  def update_envelope(envelope_uid, data) do
+    "/envelopes/#{envelope_uid}"
+    |> Base.put(data)
+    |> _parse_response()
   end
 
   @doc """
@@ -53,15 +59,8 @@ defmodule DocusignEx.Api.Envelope do
   @spec get_envelope(String.t()) :: map
   def get_envelope(envelope_uid) do
     "/envelopes/#{envelope_uid}"
-    |> Base.get(
-         [],
-         [
-           connect_timeout: @connect_timeout,
-           recv_timeout: @recv_timeout,
-           timeout: @timeout
-         ]
-       )
-    |> _parse_get_response()
+    |> Base.get()
+    |> _parse_response()
   end
 
   @doc """
@@ -70,15 +69,8 @@ defmodule DocusignEx.Api.Envelope do
   @spec get_documents(String.t()) :: map
   def get_documents(envelope_uid) do
     "/envelopes/#{envelope_uid}/documents"
-    |> Base.get(
-         [],
-         [
-           connect_timeout: @connect_timeout,
-           recv_timeout: @recv_timeout,
-           timeout: @timeout
-         ]
-       )
-    |> _parse_get_response()
+    |> Base.get()
+    |> _parse_response()
   end
 
   @doc """
@@ -87,14 +79,7 @@ defmodule DocusignEx.Api.Envelope do
   @spec download_document(String.t, String.t) :: map
   def download_document(envelope_uid, document_id) do
     "/envelopes/#{envelope_uid}/documents/#{document_id}"
-    |> DownloadFile.get(
-         [],
-         [
-           connect_timeout: @connect_timeout,
-           recv_timeout: @recv_timeout,
-           timeout: @timeout
-         ]
-       )
+    |> DownloadFile.get()
     |> _parse_download_response()
   end
 
@@ -117,11 +102,11 @@ defmodule DocusignEx.Api.Envelope do
     "message" => "Unknown error"
   }}
 
-  @spec _parse_get_response(tuple) :: tuple
-  defp _parse_get_response({:ok, %Response{body: body, status_code: 200}}) do
+  @spec _parse_response(tuple) :: tuple
+  defp _parse_response({:ok, %Response{body: body, status_code: 200}}) do
     {:ok, body}
   end
-  defp _parse_get_response(error) do
+  defp _parse_response(error) do
     Logger.error(
       "No se pudo obtener información del paquete, #{inspect(error)}"
     )
