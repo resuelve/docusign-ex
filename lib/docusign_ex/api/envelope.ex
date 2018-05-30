@@ -40,16 +40,17 @@ defmodule DocusignEx.Api.Envelope do
 
   ## Ejemplos
     iex> data = %{"status" => "voided" =>, "voidedReason" => "The reason"}
-    iex> DocusignEx.Api.Envelope.send_envelope(data)
-    %{
-      "message" => "SUCCESSS"
+    iex> envelope_uid = "2a4674c5-4fd4-47b0-9af0-89970dd8e6c9"
+    iex> DocusignEx.Api.Envelope.send_envelope(envelope_uid, data)
+    {
+      :ok, %{"envelopeId" => "2a4674c5-4fd4-47b0-9af0-89970dd8e6c9"}
     }
   """
   @spec update_envelope(String.t, map) :: map
   def update_envelope(envelope_uid, data) do
     "/envelopes/#{envelope_uid}"
     |> Base.put(data)
-    |> _parse_get_response()
+    |> _parse_response()
   end
 
   @doc """
@@ -59,7 +60,7 @@ defmodule DocusignEx.Api.Envelope do
   def get_envelope(envelope_uid) do
     "/envelopes/#{envelope_uid}"
     |> Base.get()
-    |> _parse_get_response()
+    |> _parse_response()
   end
 
   @doc """
@@ -69,7 +70,7 @@ defmodule DocusignEx.Api.Envelope do
   def get_documents(envelope_uid) do
     "/envelopes/#{envelope_uid}/documents"
     |> Base.get()
-    |> _parse_get_response()
+    |> _parse_response()
   end
 
   @doc """
@@ -101,11 +102,11 @@ defmodule DocusignEx.Api.Envelope do
     "message" => "Unknown error"
   }}
 
-  @spec _parse_get_response(tuple) :: tuple
-  defp _parse_get_response({:ok, %Response{body: body, status_code: 200}}) do
+  @spec _parse_response(tuple) :: tuple
+  defp _parse_response({:ok, %Response{body: body, status_code: 200}}) do
     {:ok, body}
   end
-  defp _parse_get_response(error) do
+  defp _parse_response(error) do
     Logger.error(
       "No se pudo obtener información del paquete, #{inspect(error)}"
     )
