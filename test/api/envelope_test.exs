@@ -64,15 +64,14 @@ defmodule DocusignEx.Api.EnvelopeTest do
         DocusignEx.Api.Base,
         [],
         [
-          post: fn(_, _) ->
-            {:ok, %HTTPoison.Response{
-              body: %{"envelopeId" => "123"}, headers: [], status_code: 201}}
+          post: fn _, _ ->
+            {:ok,
+             %HTTPoison.Response{body: %{"envelopeId" => "123"}, headers: [], status_code: 201}}
           end
         ]
       }
     ]) do
-      assert Envelope.send_envelope(data.json) ==
-        {:ok, %{"envelopeId" => "123"}}
+      assert Envelope.send_envelope(data.json) == {:ok, %{"envelopeId" => "123"}}
     end
   end
 
@@ -82,20 +81,28 @@ defmodule DocusignEx.Api.EnvelopeTest do
         DocusignEx.Api.Base,
         [],
         [
-          post: fn(_, _) ->
-            {:ok, %HTTPoison.Response{
-              body: %{
-                "errorCode" => "INVALID_EMAIL_ADDRESS_FOR_RECIPIENT",
-                "message" => "The email address for the recipient is invalid. The recipient Id follows."
-              }, headers: [], status_code: 400}}
+          post: fn _, _ ->
+            {:ok,
+             %HTTPoison.Response{
+               body: %{
+                 "errorCode" => "INVALID_EMAIL_ADDRESS_FOR_RECIPIENT",
+                 "message" =>
+                   "The email address for the recipient is invalid. The recipient Id follows."
+               },
+               headers: [],
+               status_code: 400
+             }}
           end
         ]
       }
     ]) do
       assert Envelope.send_envelope(data.json) ==
-        {:error, %{
-          "errorCode" => "INVALID_EMAIL_ADDRESS_FOR_RECIPIENT",
-          "message" => "The email address for the recipient is invalid. The recipient Id follows."}}
+               {:error,
+                %{
+                  "errorCode" => "INVALID_EMAIL_ADDRESS_FOR_RECIPIENT",
+                  "message" =>
+                    "The email address for the recipient is invalid. The recipient Id follows."
+                }}
     end
   end
 
@@ -105,20 +112,24 @@ defmodule DocusignEx.Api.EnvelopeTest do
         DocusignEx.Api.Base,
         [],
         [
-          put: fn(_, _) ->
-            {:ok, %HTTPoison.Response{
-              body: %{
-                "errorCode" => "",
-                "message" => "SUCCESS"
-              }, headers: [], status_code: 200}}
+          put: fn _, _ ->
+            {:ok,
+             %HTTPoison.Response{
+               body: %{
+                 "errorCode" => "",
+                 "message" => "SUCCESS"
+               },
+               headers: [],
+               status_code: 200
+             }}
           end
         ]
       }
     ]) do
       assert Envelope.update_envelope("SOME-UID", %{
-        "status" => "voided",
-        "voidedReason" => "The reason for voiding the envelope"
-      }) == {:ok, %{"errorCode" => "", "message" => "SUCCESS"}}
+               "status" => "voided",
+               "voidedReason" => "The reason for voiding the envelope"
+             }) == {:ok, %{"errorCode" => "", "message" => "SUCCESS"}}
     end
   end
 end

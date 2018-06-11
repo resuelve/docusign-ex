@@ -19,7 +19,7 @@ defmodule DocusignEx.Api.AuthBase do
 
     [
       {"X-DocuSign-Authentication", auth_headers},
-      {"Content-Type", "application/json"},
+      {"Content-Type", "application/json"}
     ]
   end
 

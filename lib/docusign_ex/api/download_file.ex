@@ -28,7 +28,7 @@ defmodule DocusignEx.Api.DownloadFile do
 
     [
       {"X-DocuSign-Authentication", auth_headers},
-      {"Content-Type", "application/json"},
+      {"Content-Type", "application/json"}
     ]
   end
 end
