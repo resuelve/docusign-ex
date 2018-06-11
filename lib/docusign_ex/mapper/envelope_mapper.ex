@@ -121,8 +121,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   """
   @spec get_document_id(map, map) :: integer
   def get_document_id(data, document) do
-    id = Enum.find_index(get_document_list(data), &(&1 == document))
-    (!is_nil(id) && id) || nil
+    Enum.find_index(get_document_list(data), &(&1 == document))
   end
 
   @doc """
