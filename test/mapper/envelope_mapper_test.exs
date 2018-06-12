@@ -135,14 +135,14 @@ defmodule DocusignEx.Mapper.EnvelopeMapperTest do
 
   test "Should add documents", data do
     assert add_documents(%{}, data.json) == %{
-      "documents" => [
-        %{
-          "documentBase64" => "MTIzNDU2Nzg5CmFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6Cg==",
-          "documentId" => "1",
-          "fileExtension" => "txt",
-          "name" => "test64.txt"
-        }
-      ]
-    }
+             "documents" => [
+               %{
+                 "documentBase64" => "MTIzNDU2Nzg5CmFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6Cg==",
+                 "documentId" => "1",
+                 "fileExtension" => "txt",
+                 "name" => "test64.txt"
+               }
+             ]
+           }
   end
 end

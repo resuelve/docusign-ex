@@ -46,7 +46,7 @@ defmodule DocusignEx.Api.Envelope do
       :ok, %{"envelopeId" => "2a4674c5-4fd4-47b0-9af0-89970dd8e6c9"}
     }
   """
-  @spec update_envelope(String.t, map) :: map
+  @spec update_envelope(String.t(), map) :: map
   def update_envelope(envelope_uid, data) do
     "/envelopes/#{envelope_uid}"
     |> Base.put(data)
@@ -76,7 +76,7 @@ defmodule DocusignEx.Api.Envelope do
   @doc """
   Devuelve el stream de datos de un documento
   """
-  @spec download_document(String.t, String.t) :: map
+  @spec download_document(String.t(), String.t()) :: map
   def download_document(envelope_uid, document_id) do
     "/envelopes/#{envelope_uid}/documents/#{document_id}"
     |> DownloadFile.get()
@@ -84,55 +84,53 @@ defmodule DocusignEx.Api.Envelope do
   end
 
   @spec _parse_post_response({:ok, %Response{}}) :: map()
-  defp _parse_post_response(
-         {
-           :ok,
-           %Response{
-             body: body,
-             headers: _headers,
-             status_code: 201
-           }
+  defp _parse_post_response({
+         :ok,
+         %Response{
+           body: body,
+           headers: _headers,
+           status_code: 201
          }
-       ) do
+       }) do
     {:ok, body}
   end
+
   defp _parse_post_response({:ok, %Response{body: body}}), do: {:error, body}
-  defp _parse_post_response(_), do: {:error, %{
-    "errorCode" => "Unknown",
-    "message" => "Unknown error"
-  }}
+
+  defp _parse_post_response(_),
+    do:
+      {:error,
+       %{
+         "errorCode" => "Unknown",
+         "message" => "Unknown error"
+       }}
 
   @spec _parse_response(tuple) :: tuple
   defp _parse_response({:ok, %Response{body: body, status_code: 200}}) do
     {:ok, body}
   end
+
   defp _parse_response(error) do
-    Logger.error(
-      "No se pudo obtener información del paquete, #{inspect(error)}"
-    )
+    Logger.error("No se pudo obtener información del paquete, #{inspect(error)}")
     {:error, "El paquete no existe o no se puede acceder en este momento"}
   end
 
   @spec _parse_download_response(tuple) :: tuple
-  defp _parse_download_response(
-         {:ok, %Response{body: body, headers: headers, status_code: 200}}
-       ) do
+  defp _parse_download_response({:ok, %Response{body: body, headers: headers, status_code: 200}}) do
     if Enum.find(
          headers,
-         fn {header_name, header_value} -> header_name == "Content-Type" and
-                                           header_value == "application/pdf"
+         fn {header_name, header_value} ->
+           header_name == "Content-Type" and header_value == "application/pdf"
          end
        ) do
       {:ok, body}
     else
       {:error, "El documento no es un PDF"}
     end
-
   end
+
   defp _parse_download_response(error) do
-    Logger.error(
-      "No se pudo obtener información documento, #{inspect(error)}"
-    )
+    Logger.error("No se pudo obtener información documento, #{inspect(error)}")
     {:error, "El documento no existe o no se puede acceder en este momento"}
   end
 end

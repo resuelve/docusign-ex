@@ -4,7 +4,8 @@ defmodule DocusignEx.Utils.FileUtilsTest do
   import DocusignEx.Utils.FileUtils
 
   test "Should encode the file to base64" do
-    assert encode64("test/utils/test64.txt") == "MTIzNDU2Nzg5CmFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6Cg=="
+    assert encode64("test/utils/test64.txt") ==
+             "MTIzNDU2Nzg5CmFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6Cg=="
   end
 
   test "Should return the filename from a path" do

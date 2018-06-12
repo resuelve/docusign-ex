@@ -6,7 +6,7 @@ defmodule DocusignEx.Utils.FileUtils do
   @doc """
   Encodea a base64 el archivo
   """
-  @spec encode64(String.t) :: String.t
+  @spec encode64(String.t()) :: String.t()
   def encode64(file_path) do
     data = File.read!(file_path)
     :base64.encode(data)
@@ -15,12 +15,13 @@ defmodule DocusignEx.Utils.FileUtils do
   @doc """
   Obtiene el nombre del archivo de un path
   """
-  @spec get_filename(String.t) :: String.t
+  @spec get_filename(String.t()) :: String.t()
   def get_filename(file_path) do
     case Regex.run(~r/\/([^\/]+)$/, file_path) do
       [_, file] ->
         file
-      _         ->
+
+      _ ->
         file_path
     end
   end
@@ -28,12 +29,13 @@ defmodule DocusignEx.Utils.FileUtils do
   @doc """
   Obtiene la extensión del archivo de un path
   """
-  @spec get_extension(String.t) :: String.t
+  @spec get_extension(String.t()) :: String.t()
   def get_extension(file_path) do
     case Regex.run(~r/\/[^\/]+\.(.+)$/, file_path) do
       [_, extension] ->
         extension
-      _         ->
+
+      _ ->
         file_path
     end
   end
