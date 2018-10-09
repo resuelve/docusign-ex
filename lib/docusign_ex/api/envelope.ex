@@ -36,6 +36,28 @@ defmodule DocusignEx.Api.Envelope do
   end
 
   @doc """
+  Reenvía un sobre a sus destinatarios originales
+  """
+  @spec resend_envelope(String.t) :: map
+  def resend_envelope(envelope_uid) do
+    with {:ok, recipients} = _get_recipients(envelope_uid) do
+      signers = Map.take(recipients, ["signers"])
+
+      "/envelopes/#{envelope_uid}/recipients?resend_envelope=true"
+      |> Base.put(signers)
+      |> _parse_response()
+    end
+  end
+
+  # Devuelve la lista de destinatorios de un sobre
+  @spec _get_recipients(String.t) :: map
+  defp _get_recipients(envelope_uid) do
+    "/envelopes/#{envelope_uid}/recipients"
+    |> Base.get()
+    |> _parse_response()
+  end
+
+  @doc """
   Actualiza un sobre por medio del uid
 
   ## Ejemplos
