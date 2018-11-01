@@ -17,6 +17,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
     |> add_documents(envelope_data)
     |> add_signers(envelope_data)
     |> add_webhook(envelope_data)
+    |> add_reply_to(envelope_data)
   end
 
   @doc """
@@ -133,12 +134,9 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   def add_tabs(tabs, document_id, recipient_id) do
     tabs
     |> Map.keys()
-    |> Enum.reduce(
-      %{},
-      fn key, acc ->
-        do_add_tabs(acc, tabs, document_id, recipient_id, key)
-      end
-    )
+    |> Enum.reduce(%{}, fn key, acc ->
+      do_add_tabs(acc, tabs, document_id, recipient_id, key)
+    end)
   end
 
   # Agrega los tabs a la lista
@@ -168,5 +166,22 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   @spec add_webhook(map, map) :: map
   def add_webhook(envelope, data) do
     Map.put(envelope, "eventNotification", Map.get(data, "eventNotification"))
+  end
+
+  @doc """
+  Mapea el valor que aparecerá en el campo reply_to del correo en el que
+  se enviará el sobre
+  """
+  @spec add_reply_to(map, map) :: map
+  def add_reply_to(envelope, data) do
+    case Map.get(data, "reply_to") do
+      nil ->
+        envelope
+
+      email ->
+        Map.put(envelope, "emailSettings", %{
+          "replyEmailAddressOverride" => email
+        })
+    end
   end
 end
