@@ -18,6 +18,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
     |> add_signers(envelope_data)
     |> add_webhook(envelope_data)
     |> add_reply_to(envelope_data)
+    |> add_email_body(envelope_data)
   end
 
   @doc """
@@ -182,6 +183,18 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
         Map.put(envelope, "emailSettings", %{
           "replyEmailAddressOverride" => email
         })
+    end
+  end
+
+  @doc """
+  Mapea el mensaje que se aparecerá en el cuerpo del correo en el que se
+  enviará el sobre (opcional)
+  """
+  @spec add_email_body(map, map) :: map
+  def add_email_body(envelope, data) do
+    case Map.get(data, "emailBody") do
+      nil -> envelope
+      emailBody -> Map.put(envelope, "emailBlurb", emailBody)
     end
   end
 end
