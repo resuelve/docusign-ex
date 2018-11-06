@@ -192,9 +192,9 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   """
   @spec add_email_body(map, map) :: map
   def add_email_body(envelope, data) do
-    case Map.get(data, "emailBody") do
+    case Map.get(data, "email_body") do
       nil -> envelope
-      emailBody -> Map.put(envelope, "emailBlurb", emailBody)
+      email_body -> Map.put(envelope, "emailBlurb", email_body)
     end
   end
 end
