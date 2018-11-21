@@ -19,6 +19,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
     |> add_webhook(envelope_data)
     |> add_reply_to(envelope_data)
     |> add_email_body(envelope_data)
+    |> add_carbon_copies(envelope_data)
   end
 
   @doc """
@@ -196,5 +197,39 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
       nil -> envelope
       email_body -> Map.put(envelope, "emailBlurb", email_body)
     end
+  end
+
+  @doc """
+  Mapea los correos a los que se enviará copia carbón del sobre, si son
+  proporcionados
+  """
+  @spec add_carbon_copies(map, map) :: map
+  def add_carbon_copies(envelope, %{"carbon_copies" => carbon_copies})
+      when is_list(carbon_copies) do
+    number_of_signers =
+      envelope
+      |> get_in(["recipients", "signers"])
+      |> length()
+      |> Kernel.+(1)
+
+    cc =
+      carbon_copies
+      |> Enum.with_index()
+      |> Enum.map(fn {%{email: email, name: name}, index} ->
+        id = Integer.to_string(number_of_signers + index)
+
+        %{
+          "email" => carbon_copies,
+          "name" => name,
+          "recipientId" => id,
+          "routingOrder" => id
+        }
+      end)
+
+    put_in(envelope, ["recipients", "carbon_copies"], cc)
+  end
+
+  def add_carbon_copies(envelope, _data) do
+    envelope
   end
 end
