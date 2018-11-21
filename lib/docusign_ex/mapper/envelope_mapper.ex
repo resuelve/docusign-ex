@@ -215,7 +215,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
     cc =
       carbon_copies
       |> Enum.with_index()
-      |> Enum.map(fn {%{email: email, name: name}, index} ->
+      |> Enum.map(fn {%{"email" => email, "name" => name}, index} ->
         id = Integer.to_string(number_of_signers + index)
 
         %{
