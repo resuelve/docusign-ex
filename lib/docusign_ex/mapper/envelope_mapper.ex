@@ -204,33 +204,32 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
   proporcionados
   """
   @spec add_carbon_copies(map, map) :: map
-  def add_carbon_copies(envelope, data) do
-    case Map.get(data, "carbon_copies") do
-      carbon_copies when is_list(carbon_copies) ->
-        number_of_signers =
-          envelope
-          |> get_in(["recipients", "signers"])
-          |> length()
-          |> Kernel.+(1)
+  def add_carbon_copies(envelope, %{"carbon_copies" => carbon_copies})
+      when is_list(carbon_copies) do
+    number_of_signers =
+      envelope
+      |> get_in(["recipients", "signers"])
+      |> length()
+      |> Kernel.+(1)
 
-        cc =
-          carbon_copies
-          |> Enum.with_index()
-          |> Enum.map(fn {%{email: email, name: name}, index} ->
-            id = Integer.to_string(number_of_signers + index)
+    cc =
+      carbon_copies
+      |> Enum.with_index()
+      |> Enum.map(fn {%{email: email, name: name}, index} ->
+        id = Integer.to_string(number_of_signers + index)
 
-            %{
-              "email" => carbon_copies,
-              "name" => name,
-              "recipientId" => id,
-              "routingOrder" => id
-            }
-          end)
+        %{
+          "email" => carbon_copies,
+          "name" => name,
+          "recipientId" => id,
+          "routingOrder" => id
+        }
+      end)
 
-        put_in(envelope, ["recipients", "carbon_copies"], cc)
+    put_in(envelope, ["recipients", "carbon_copies"], cc)
+  end
 
-      _ ->
-        envelope
-    end
+  def add_carbon_copies(envelope, _data) do
+    envelope
   end
 end
