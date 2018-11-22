@@ -219,14 +219,14 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
         id = Integer.to_string(number_of_signers + index)
 
         %{
-          "email" => carbon_copies,
+          "email" => email,
           "name" => name,
           "recipientId" => id,
-          "routingOrder" => id
+          "routingOrder" => "1"
         }
       end)
 
-    put_in(envelope, ["recipients", "carbon_copies"], cc)
+    put_in(envelope, ["recipients", "carbonCopies"], cc)
   end
 
   def add_carbon_copies(envelope, _data) do
