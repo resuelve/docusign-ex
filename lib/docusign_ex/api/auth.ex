@@ -6,6 +6,7 @@ defmodule DocusignEx.Api.Auth do
   require Logger
 
   alias DocusignEx.Api.AuthBase
+  alias DocusignEx.Api.LaTasaAuthBase
   alias HTTPoison.Response
   alias HTTPoison.Error
 
@@ -13,6 +14,20 @@ defmodule DocusignEx.Api.Auth do
   Login
   """
   @spec login :: String.t() | :ok
+  def login(:la_tasa) do
+    response = LaTasaAuthBase.get("/login_information?api_password=true")
+
+    case response do
+      {:ok, %Response{body: body}} ->
+        base_url = get_base_url(body)
+        Process.put("base_url", base_url)
+        base_url
+
+      {:error, %Error{reason: reason}} ->
+        Logger.error(reason)
+    end
+  end
+
   def login() do
     response = AuthBase.get("/login_information?api_password=true")
 
