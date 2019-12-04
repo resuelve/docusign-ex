@@ -1,4 +1,4 @@
-defmodule DocusignEx.Api.Base do
+defmodule DocusignEx.Api.LaTasaBase do
   @moduledoc """
   Funcionalidades básicas y comunes del API del Docusign
   """
