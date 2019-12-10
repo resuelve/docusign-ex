@@ -24,7 +24,7 @@ defmodule DocusignEx.Mixfile do
       {:exprintf, github: "parroty/exprintf"},
       {:excoveralls, "~> 0.6.3", only: :test},
       {:credo, "~> 0.8.6", only: :test},
-      {:mock, "~> 0.3.0", only: :test}
+      {:mock, "~> 0.3.1", only: :test}
     ]
   end
 end
