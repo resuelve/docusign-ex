@@ -2,61 +2,11 @@ defmodule DocusignEx.Api.EnvelopeTest do
   use ExUnit.Case
 
   import Mock
-  alias DocusignEx.Api.Envelope
 
-  setup do
-    [
-      json: %{
-        "subject" => "Test",
-        "signers" => [
-          %{
-            "name" => "Name",
-            "email" => "email@email.com",
-            "documents" => [
-              %{
-                "path" => "test/utils/test64.txt",
-                "tabs" => %{
-                  "dateSignedTabs" => [
-                    %{
-                      "xPosition" => "32",
-                      "yPosition" => "75",
-                      "pageNumber" => "1"
-                    },
-                    %{
-                      "xPosition" => "62",
-                      "yPosition" => "10",
-                      "pageNumber" => "1"
-                    }
-                  ],
-                  "fullNameTabs" => [
-                    %{
-                      "xPosition" => "10",
-                      "yPosition" => "100",
-                      "pageNumber" => "1"
-                    }
-                  ],
-                  "signHereTabs" => [
-                    %{
-                      "xPosition" => "25",
-                      "yPosition" => "62",
-                      "pageNumber" => "1"
-                    }
-                  ],
-                  "initialHereTabs" => [
-                    %{
-                      "xPosition" => "20",
-                      "yPosition" => "20",
-                      "pageNumber" => "1"
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  end
+  alias DocusignEx.Api.Envelope
+  alias HTTPoison.Response
+  alias HTTPoison
+  alias DocusignEx.Api.Base
 
   test "send_envelope/1 returns ok response", data do
     with_mocks([
@@ -109,12 +59,12 @@ defmodule DocusignEx.Api.EnvelopeTest do
   test "update_envelope/2 updates the envelope status" do
     with_mocks([
       {
-        DocusignEx.Api.Base,
+        Base,
         [],
         [
           put: fn _, _ ->
             {:ok,
-             %HTTPoison.Response{
+             %Response{
                body: %{
                  "errorCode" => "",
                  "message" => "SUCCESS"
@@ -126,6 +76,33 @@ defmodule DocusignEx.Api.EnvelopeTest do
         ]
       }
     ]) do
+      assert Envelope.update_envelope("SOME-UID", %{
+               "status" => "voided",
+               "voidedReason" => "The reason for voiding the envelope"
+             }) == {:ok, %{"errorCode" => "", "message" => "SUCCESS"}}
+    end
+  end
+
+  test "foo" do
+    with_mocks [
+      {
+        Base,
+        [],
+        [
+          put: fn _, _ ->
+            {:ok,
+             %Response{
+               body: %{
+                 "errorCode" => "",
+                 "message" => "SUCCESS"
+               },
+               headers: [],
+               status_code: 200
+             }}
+          end
+        ]
+      }
+    ] do
       assert Envelope.update_envelope("SOME-UID", %{
                "status" => "voided",
                "voidedReason" => "The reason for voiding the envelope"
