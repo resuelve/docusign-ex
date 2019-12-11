@@ -26,9 +26,9 @@ defmodule DocusignEx.Api.Base do
   @spec process_request_options(list) :: list
   defp process_request_options(options) do
     [
-      connect_timeout: @connect_timeout,
-      recv_timeout: @recv_timeout,
-      timeout: @timeout
+      connect_timeout: Application.get_env(:docusign_ex, :connect_timeout, @connect_timeout),
+      recv_timeout: Application.get_env(:docusign_ex, :recv_timeout, @recv_timeout),
+      timeout: Application.get_env(:docusign_ex, :timeout, @timeout)
     ] ++ options
   end
 
