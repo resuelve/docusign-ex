@@ -38,7 +38,7 @@ defmodule DocusignEx.Api.Envelope do
   @doc """
   Reenvía un sobre a sus destinatarios originales
   """
-  @spec resend_envelope(String.t) :: map
+  @spec resend_envelope(String.t()) :: map
   def resend_envelope(envelope_uid) do
     with {:ok, recipients} = _get_recipients(envelope_uid) do
       signers = Map.take(recipients, ["signers"])
@@ -50,7 +50,7 @@ defmodule DocusignEx.Api.Envelope do
   end
 
   # Devuelve la lista de destinatorios de un sobre
-  @spec _get_recipients(String.t) :: map
+  @spec _get_recipients(String.t()) :: map
   defp _get_recipients(envelope_uid) do
     "/envelopes/#{envelope_uid}/recipients"
     |> Base.get()
@@ -119,12 +119,14 @@ defmodule DocusignEx.Api.Envelope do
 
   defp _parse_post_response({:ok, %Response{body: body}}), do: {:error, body}
 
-  defp _parse_post_response(_),
+  defp _parse_post_response({:error, %Error{reason: reason}}), do: {:error, reason}
+
+  defp _parse_post_response(error),
     do:
       {:error,
        %{
          "errorCode" => "Unknown",
-         "message" => "Unknown error"
+         "message" => "#{inspect(error)}"
        }}
 
   @spec _parse_response(tuple) :: tuple
