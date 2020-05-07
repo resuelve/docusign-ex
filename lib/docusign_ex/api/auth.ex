@@ -7,6 +7,7 @@ defmodule DocusignEx.Api.Auth do
 
   alias DocusignEx.Api.AuthBase
   alias DocusignEx.Api.LaTasaAuthBase
+  alias DocusignEx.Api.CreditoAuthBase
   alias HTTPoison.Response
   alias HTTPoison.Error
 
