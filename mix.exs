@@ -4,7 +4,7 @@ defmodule DocusignEx.Mixfile do
   def project do
     [
       app: :docusign_ex,
-      version: "0.1.0",
+      version: "1.5.0",
       elixir: "~> 1.5",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -21,7 +21,6 @@ defmodule DocusignEx.Mixfile do
     [
       {:httpoison, "~> 0.11.1"},
       {:poison, "~> 2.1 or ~> 3.1"},
-      {:exprintf, github: "parroty/exprintf"},
       {:excoveralls, "~> 0.6.3", only: :test},
       {:credo, "~> 0.8.6", only: :test},
       {:mock, "~> 0.3.1", only: :test}

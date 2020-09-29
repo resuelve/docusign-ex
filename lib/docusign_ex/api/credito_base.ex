@@ -3,12 +3,13 @@ defmodule DocusignEx.Api.CreditoBase do
   Funcionalidades básicas y comunes del API del Docusign
   """
 
-  @auth_header "{\"Username\":\"%s\",\"Password\":\"%s\",\"IntegratorKey\": \"%s\"}"
   @connect_timeout 100_000
   @recv_timeout 100_000
   @timeout 100_000
 
   use HTTPoison.Base
+
+  alias DocusignEx.Api.Helper
 
   # Devuelve el endpoint de Docusign
   @spec api :: String.t()
@@ -38,10 +39,9 @@ defmodule DocusignEx.Api.CreditoBase do
     username = Application.get_env(:docusign_ex, :credito_username)
     password = Application.get_env(:docusign_ex, :credito_password)
     integrator_key = Application.get_env(:docusign_ex, :integrator_key)
-    auth_headers = ExPrintf.sprintf(@auth_header, [username, password, integrator_key])
 
     [
-      {"X-DocuSign-Authentication", auth_headers},
+      Helper.build_custom_auth_header(username, password, integrator_key),
       {"Content-Type", "application/json"}
     ] ++ headers
   end

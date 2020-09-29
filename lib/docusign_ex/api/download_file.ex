@@ -3,9 +3,8 @@ defmodule DocusignEx.Api.DownloadFile do
   Funcionalidades para descarga de documentos
   """
 
-  @auth_header "{\"Username\":\"%s\",\"Password\":\"%s\",\"IntegratorKey\": \"%s\"}"
-
   use HTTPoison.Base
+  alias DocusignEx.Api.Helper
 
   @doc """
   Devuelve la URL base para realizar peticiones a Docusign (incluyendo el id
@@ -24,10 +23,9 @@ defmodule DocusignEx.Api.DownloadFile do
     username = Application.get_env(:docusign_ex, :username)
     password = Application.get_env(:docusign_ex, :password)
     integrator_key = Application.get_env(:docusign_ex, :integrator_key)
-    auth_headers = ExPrintf.sprintf(@auth_header, [username, password, integrator_key])
 
     [
-      {"X-DocuSign-Authentication", auth_headers},
+      Helper.build_custom_auth_header(username, password, integrator_key),
       {"Content-Type", "application/json"}
     ]
   end
