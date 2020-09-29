@@ -3,9 +3,9 @@ defmodule DocusignEx.Api.CreditoAuthBase do
   Funcionalidades básicas y comunes del API del Docusign
   """
 
-  @auth_header "{\"Username\":\"%s\",\"Password\":\"%s\",\"IntegratorKey\": \"%s\"}"
-
   use HTTPoison.Base
+
+  alias DocusignEx.Api.Helper
 
   def api, do: Application.get_env(:docusign_ex, :host)
   defp process_url(url), do: api() <> url
@@ -15,10 +15,9 @@ defmodule DocusignEx.Api.CreditoAuthBase do
     username = Application.get_env(:docusign_ex, :credito_username)
     password = Application.get_env(:docusign_ex, :credito_password)
     integrator_key = Application.get_env(:docusign_ex, :integrator_key)
-    auth_headers = ExPrintf.sprintf(@auth_header, [username, password, integrator_key])
 
     [
-      {"X-DocuSign-Authentication", auth_headers},
+      Helper.build_custom_auth_header(username, password, integrator_key),
       {"Content-Type", "application/json"}
     ]
   end

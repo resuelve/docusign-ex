@@ -9,7 +9,7 @@ by adding `docusign_ex` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:docusign_ex, "~> 0.1.0"}]
+  [{:docusign_ex, "~> 1.5.0"}]
 end
 ```
 
