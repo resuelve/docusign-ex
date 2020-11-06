@@ -132,4 +132,35 @@ defmodule DocusignEx.Api.EnvelopeTest do
              }) == {:ok, %{"errorCode" => "", "message" => "SUCCESS"}}
     end
   end
+
+  test "update_envelope/2 returns docusign error code fro 400 status code" do
+    docusign_error_code = "ENVELOPE_CANNOT_VOID_INVALID_STATE"
+    docusign_error_message = "Only envelopes in the 'Sent' or 'Delivered' states may be voided."
+
+    with_mocks([
+      {
+        DocusignEx.Api.Base,
+        [],
+        [
+          put: fn _, _ ->
+            {:ok,
+             %HTTPoison.Response{
+               body: %{
+                 "errorCode" => docusign_error_code,
+                 "message" => docusign_error_message
+               },
+               headers: [],
+               status_code: 400
+             }}
+          end
+        ]
+      }
+    ]) do
+      assert Envelope.update_envelope("SOME-UID", %{
+               "status" => "voided",
+               "voidedReason" => "The reason for voiding the envelope"
+             }) ==
+               {:error, docusign_error_code}
+    end
+  end
 end
