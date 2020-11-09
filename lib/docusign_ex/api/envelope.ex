@@ -134,6 +134,14 @@ defmodule DocusignEx.Api.Envelope do
     {:ok, body}
   end
 
+  # cuando el estado de error es 400, Docusign devuelve en el body el código de error
+  # y una descripción, por simplicidad se va a tomar solo el código de error el cual puede
+  # ser consultado en la documentación de Docusign en
+  # https://developers.docusign.com/docs/esign-rest-api/esign101/status-and-error-codes/
+  defp _parse_response({:ok, %Response{body: body, status_code: 400}}) do
+    {:error, Map.get(body, "errorCode")}
+  end
+
   defp _parse_response(error) do
     Logger.error("No se pudo obtener información del paquete, #{inspect(error)}")
     {:error, "El paquete no existe o no se puede acceder en este momento"}
