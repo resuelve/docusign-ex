@@ -5,6 +5,8 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
 
   alias DocusignEx.Utils.FileUtils
 
+  @signer_default_lang "es"
+
   @doc """
   Mapea la información del envelope al formato que pide Docusign
   """
@@ -109,7 +111,10 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
             "name" => Map.get(signer, "name"),
             "recipientId" => acc,
             "routingOrder" => acc,
-            "tabs" => tabs
+            "tabs" => tabs,
+            "emailNotification" => %{
+              "supportedLanguage" => Map.get(signer, "lang", @signer_default_lang)
+            }
           },
           acc + 1
         }
