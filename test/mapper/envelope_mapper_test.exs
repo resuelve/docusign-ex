@@ -22,6 +22,9 @@ defmodule DocusignEx.Mapper.EnvelopeMapperTest do
               "name" => "Name",
               "recipientId" => 1,
               "routingOrder" => 1,
+              "emailNotification" => %{
+                "supportedLanguage" => "es"
+              },
               "tabs" => %{
                 "initialHereTabs" => [
                   %{
