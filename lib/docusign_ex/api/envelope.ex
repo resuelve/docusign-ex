@@ -3,12 +3,13 @@ defmodule DocusignEx.Api.Envelope do
   Manejo de apis relacionadas a los sobres de Docusign
   """
 
-  require Logger
-  alias DocusignEx.Api.Base
   alias DocusignEx.Api.DownloadFile
-  alias HTTPoison.Response
-  alias HTTPoison.Error
   alias DocusignEx.Mapper.EnvelopeMapper
+  alias DocusignEx.Request
+
+  require Logger
+
+  @type json_api_response :: {:ok, map()} | {:error, map()}
 
   @doc """
   Envia un documento para que el remitente pueda firmarlo.
@@ -26,35 +27,39 @@ defmodule DocusignEx.Api.Envelope do
         "uri" => "/envelopes/5aadc814-53be-4a03-8590-6cf381faa163"
       }
   """
-  @spec send_envelope(map) :: map
-  def send_envelope(envelope_data) do
+  @spec send_envelope(Config.t(), map) :: json_api_response()
+  def send_envelope(auth_config, envelope_data) do
     envelope = EnvelopeMapper.map(envelope_data)
 
-    "/envelopes"
-    |> Base.post(envelope)
-    |> _parse_post_response()
+    auth_config
+    |> Request.new("envelopes")
+    |> Request.post(envelope)
+    |> parse_response()
   end
 
   @doc """
   Reenvía un sobre a sus destinatarios originales
   """
-  @spec resend_envelope(String.t()) :: map
-  def resend_envelope(envelope_uid) do
-    with {:ok, recipients} = _get_recipients(envelope_uid) do
+  @spec resend_envelope(Config.t(), String.t()) :: json_api_response()
+  def resend_envelope(auth_config, envelope_uid) do
+    with {:ok, recipients} = get_recipients(auth_config, envelope_uid) do
       signers = Map.take(recipients, ["signers"])
 
-      "/envelopes/#{envelope_uid}/recipients?resend_envelope=true"
-      |> Base.put(signers)
-      |> _parse_response()
+      auth_config
+      |> Request.new("/envelopes/#{envelope_uid}/recipients")
+      |> Request.add_query_param("resend_envelope", true)
+      |> Request.put(signers)
+      |> parse_response()
     end
   end
 
   # Devuelve la lista de destinatorios de un sobre
-  @spec _get_recipients(String.t()) :: map
-  defp _get_recipients(envelope_uid) do
-    "/envelopes/#{envelope_uid}/recipients"
-    |> Base.get()
-    |> _parse_response()
+  @spec get_recipients(Config.t(), String.t()) :: json_api_response()
+  defp get_recipients(auth_config, envelope_uid) do
+    auth_config
+    |> Request.new("/envelopes/#{envelope_uid}/recipients")
+    |> Request.get()
+    |> parse_response()
   end
 
   @doc """
@@ -68,101 +73,54 @@ defmodule DocusignEx.Api.Envelope do
       :ok, %{"envelopeId" => "2a4674c5-4fd4-47b0-9af0-89970dd8e6c9"}
     }
   """
-  @spec update_envelope(String.t(), map) :: map
-  def update_envelope(envelope_uid, data) do
-    "/envelopes/#{envelope_uid}"
-    |> Base.put(data)
-    |> _parse_response()
+  @spec update_envelope(Config.t(), String.t(), map) :: json_api_response()
+  def update_envelope(auth_config, envelope_uid, data) do
+    auth_config
+    |> Request.new("/envelopes/#{envelope_uid}")
+    |> Request.put(data)
+    |> parse_response()
   end
 
   @doc """
   Obtiene la información de un sobre de docusign
   """
-  @spec get_envelope(String.t()) :: map
-  def get_envelope(envelope_uid) do
-    "/envelopes/#{envelope_uid}"
-    |> Base.get()
-    |> _parse_response()
+  @spec get_envelope(Config.t(), String.t()) :: json_api_response()
+  def get_envelope(auth_config, envelope_uid) do
+    auth_config
+    |> Request.new("/envelopes/#{envelope_uid}")
+    |> Request.get()
+    |> parse_response()
   end
 
   @doc """
   Obtiene la lista de documentos asociados a un sobre de docusign
   """
-  @spec get_documents(String.t()) :: map
-  def get_documents(envelope_uid) do
-    "/envelopes/#{envelope_uid}/documents"
-    |> Base.get()
-    |> _parse_response()
+  @spec get_documents(Config.t(), String.t()) :: json_api_response()
+  def get_documents(auth_config, envelope_uid) do
+    auth_config
+    |> Request.new("/envelopes/#{envelope_uid}/documents")
+    |> Request.get()
+    |> parse_response()
   end
 
   @doc """
   Devuelve el stream de datos de un documento
   """
-  @spec download_document(String.t(), String.t()) :: map
-  def download_document(envelope_uid, document_id) do
-    "/envelopes/#{envelope_uid}/documents/#{document_id}"
-    |> DownloadFile.get()
-    |> _parse_download_response()
+  @spec download_document(Config.t(), String.t(), String.t()) :: json_api_response()
+  def download_document(auth_config, envelope_uid, document_id) do
+    auth_config
+    |> Request.new("/envelopes/#{envelope_uid}/documents/#{document_id}")
+    |> Request.set_response_type("binary")
+    |> Request.get()
+    |> parse_response()
   end
 
-  @spec _parse_post_response({:ok, %Response{}}) :: map()
-  defp _parse_post_response({
-         :ok,
-         %Response{
-           body: body,
-           headers: _headers,
-           status_code: 201
-         }
-       }) do
-    {:ok, body}
+  @spec parse_response(Request.t()) :: {:ok, any()} | {:error, any()}
+  defp parse_response(%Request{valid?: true} = request) do
+    {:ok, request.response}
   end
 
-  defp _parse_post_response({:ok, %Response{body: body}}), do: {:error, body}
-
-  defp _parse_post_response({:error, %Error{reason: reason}}), do: {:error, reason}
-
-  defp _parse_post_response(error),
-    do:
-      {:error,
-       %{
-         "errorCode" => "Unknown",
-         "message" => "#{inspect(error)}"
-       }}
-
-  @spec _parse_response(tuple) :: tuple
-  defp _parse_response({:ok, %Response{body: body, status_code: 200}}) do
-    {:ok, body}
-  end
-
-  # cuando el estado de error es 400, Docusign devuelve en el body el código de error
-  # y una descripción, por simplicidad se va a tomar solo el código de error el cual puede
-  # ser consultado en la documentación de Docusign en
-  # https://developers.docusign.com/docs/esign-rest-api/esign101/status-and-error-codes/
-  defp _parse_response({:ok, %Response{body: body, status_code: 400}}) do
-    {:error, Map.get(body, "errorCode")}
-  end
-
-  defp _parse_response(error) do
-    Logger.error("No se pudo obtener información del paquete, #{inspect(error)}")
-    {:error, "El paquete no existe o no se puede acceder en este momento"}
-  end
-
-  @spec _parse_download_response(tuple) :: tuple
-  defp _parse_download_response({:ok, %Response{body: body, headers: headers, status_code: 200}}) do
-    if Enum.find(
-         headers,
-         fn {header_name, header_value} ->
-           header_name == "Content-Type" and header_value == "application/pdf"
-         end
-       ) do
-      {:ok, body}
-    else
-      {:error, "El documento no es un PDF"}
-    end
-  end
-
-  defp _parse_download_response(error) do
-    Logger.error("No se pudo obtener información documento, #{inspect(error)}")
-    {:error, "El documento no existe o no se puede acceder en este momento"}
+  defp parse_response(%Request{} = request) do
+    {:error, request.error}
   end
 end
