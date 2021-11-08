@@ -30,6 +30,7 @@ defmodule DocusignEx.Envelope do
 
     auth_config
     |> Request.new("envelopes")
+    |> Request.set_expected_status_code(201)
     |> Request.post(envelope)
     |> parse_response()
   end
