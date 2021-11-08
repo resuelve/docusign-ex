@@ -1,4 +1,4 @@
-defmodule DocusignEx.Api.EnvelopeTest do
+defmodule DocusignEx.EnvelopeTest do
   use ExUnit.Case
 
   import Mock

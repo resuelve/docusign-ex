@@ -1,9 +1,8 @@
-defmodule DocusignEx.Api.Envelope do
+defmodule DocusignEx.Envelope do
   @moduledoc """
   Manejo de apis relacionadas a los sobres de Docusign
   """
 
-  alias DocusignEx.Api.DownloadFile
   alias DocusignEx.Mapper.EnvelopeMapper
   alias DocusignEx.Request
 
