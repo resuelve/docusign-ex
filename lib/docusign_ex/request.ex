@@ -7,6 +7,8 @@ defmodule DocusignEx.Request do
 
   @default_headers [{"Content-Type", "application/json"}]
 
+  @type json_api_response :: {:ok, map()} | {:error, map()}
+
   @type t :: %{
           base_url: String.t(),
           endpoint: String.t(),

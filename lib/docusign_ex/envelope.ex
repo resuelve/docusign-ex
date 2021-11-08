@@ -8,8 +8,6 @@ defmodule DocusignEx.Envelope do
 
   require Logger
 
-  @type json_api_response :: {:ok, map()} | {:error, map()}
-
   @doc """
   Envia un documento para que el remitente pueda firmarlo.
 
@@ -26,7 +24,7 @@ defmodule DocusignEx.Envelope do
         "uri" => "/envelopes/5aadc814-53be-4a03-8590-6cf381faa163"
       }
   """
-  @spec send_envelope(Config.t(), map) :: json_api_response()
+  @spec send_envelope(Config.t(), map) :: Request.json_api_response()
   def send_envelope(auth_config, envelope_data) do
     envelope = EnvelopeMapper.map(envelope_data)
 
@@ -39,7 +37,7 @@ defmodule DocusignEx.Envelope do
   @doc """
   Reenvía un sobre a sus destinatarios originales
   """
-  @spec resend_envelope(Config.t(), String.t()) :: json_api_response()
+  @spec resend_envelope(Config.t(), String.t()) :: Request.json_api_response()
   def resend_envelope(auth_config, envelope_uid) do
     with {:ok, recipients} = get_recipients(auth_config, envelope_uid) do
       signers = Map.take(recipients, ["signers"])
@@ -53,7 +51,7 @@ defmodule DocusignEx.Envelope do
   end
 
   # Devuelve la lista de destinatorios de un sobre
-  @spec get_recipients(Config.t(), String.t()) :: json_api_response()
+  @spec get_recipients(Config.t(), String.t()) :: Request.json_api_response()
   defp get_recipients(auth_config, envelope_uid) do
     auth_config
     |> Request.new("/envelopes/#{envelope_uid}/recipients")
@@ -72,7 +70,7 @@ defmodule DocusignEx.Envelope do
       :ok, %{"envelopeId" => "2a4674c5-4fd4-47b0-9af0-89970dd8e6c9"}
     }
   """
-  @spec update_envelope(Config.t(), String.t(), map) :: json_api_response()
+  @spec update_envelope(Config.t(), String.t(), map) :: Request.json_api_response()
   def update_envelope(auth_config, envelope_uid, data) do
     auth_config
     |> Request.new("/envelopes/#{envelope_uid}")
@@ -83,7 +81,7 @@ defmodule DocusignEx.Envelope do
   @doc """
   Obtiene la información de un sobre de docusign
   """
-  @spec get_envelope(Config.t(), String.t()) :: json_api_response()
+  @spec get_envelope(Config.t(), String.t()) :: Request.json_api_response()
   def get_envelope(auth_config, envelope_uid) do
     auth_config
     |> Request.new("/envelopes/#{envelope_uid}")
@@ -94,7 +92,7 @@ defmodule DocusignEx.Envelope do
   @doc """
   Obtiene la lista de documentos asociados a un sobre de docusign
   """
-  @spec get_documents(Config.t(), String.t()) :: json_api_response()
+  @spec get_documents(Config.t(), String.t()) :: Request.json_api_response()
   def get_documents(auth_config, envelope_uid) do
     auth_config
     |> Request.new("/envelopes/#{envelope_uid}/documents")
@@ -105,7 +103,7 @@ defmodule DocusignEx.Envelope do
   @doc """
   Devuelve el stream de datos de un documento
   """
-  @spec download_document(Config.t(), String.t(), String.t()) :: json_api_response()
+  @spec download_document(Config.t(), String.t(), String.t()) :: Request.json_api_response()
   def download_document(auth_config, envelope_uid, document_id) do
     auth_config
     |> Request.new("/envelopes/#{envelope_uid}/documents/#{document_id}")
