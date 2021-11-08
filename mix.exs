@@ -4,8 +4,8 @@ defmodule DocusignEx.Mixfile do
   def project do
     [
       app: :docusign_ex,
-      version: "1.5.0",
-      elixir: "~> 1.5",
+      version: "2.0.0",
+      elixir: "~> 1.9",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
@@ -14,16 +14,14 @@ defmodule DocusignEx.Mixfile do
   end
 
   def application do
-    [extra_applications: [:logger, :httpoison]]
+    [extra_applications: [:logger]]
   end
 
   defp deps do
     [
-      {:httpoison, "~> 0.11.1"},
-      {:poison, "~> 2.1 or ~> 3.1"},
-      {:excoveralls, "~> 0.6.3", only: :test},
-      {:credo, "~> 0.8.6", only: :test},
-      {:mock, "~> 0.3.1", only: :test}
+      {:mojito, "~> 0.7.10"},
+      {:jason, "~> 1.2"},
+      {:mock, "~> 0.3.7", only: :test}
     ]
   end
 end
