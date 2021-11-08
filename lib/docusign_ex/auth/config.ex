@@ -3,6 +3,10 @@ defmodule DocusignEx.Auth.Config do
   Auth Config for Docusign API
   """
 
+  # This is here so we specifcally use the new v2.1 API URL
+  # Also, this is
+  @api_v2_1_url "https://www.docusign.net/restapi/v2.1"
+
   @enforce_keys [:username, :password, :integrator_key]
   defstruct [:username, :password, :integrator_key, :base_url]
 
@@ -29,7 +33,6 @@ defmodule DocusignEx.Auth.Config do
 
   @spec set_login_url(__MODULE__.t()) :: __MODULE__.t()
   def set_login_url(%__MODULE__{} = config) do
-    base_url = System.get_env("DOCUSIGN_LOGIN_URL")
-    set_base_url(config, base_url)
+    set_base_url(config, @api_v2_1_url)
   end
 end
