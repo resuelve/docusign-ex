@@ -7,6 +7,7 @@ defmodule DocusignEx.Request do
 
   @default_headers [{"Content-Type", "application/json"}]
 
+  @type api_response :: {:ok, any()} | {:error, map()}
   @type json_api_response :: {:ok, map()} | {:error, map()}
 
   @type t :: %{
@@ -66,10 +67,6 @@ defmodule DocusignEx.Request do
     add_header(request, "X-DocuSign-Authentication", Jason.encode!(payload))
   end
 
-  defp add_base_url(%__MODULE__{} = request, base_url) do
-    %{request | base_url: base_url}
-  end
-
   @spec add_query_param(__MODULE__.t(), String.t(), String.t()) :: __MODULE__.t()
   def add_query_param(%__MODULE__{} = request, key, value) do
     Map.update(request, :query, %{}, fn query_params ->
@@ -125,7 +122,7 @@ defmodule DocusignEx.Request do
   @spec parse_response({atom(), map()}, String.t()) :: __MODULE__.t()
   defp parse_response(response, %__MODULE__{expected_status_code: expected_status_code} = request) do
     case response do
-      {:ok, %{status_code: ^expected_status_code, body: body} = response} ->
+      {:ok, %{status_code: ^expected_status_code} = response} ->
         parsed_body = parse_body(response, request.response_type)
         %{request | valid?: true, status_code: 200, response: parsed_body}
 
@@ -163,5 +160,18 @@ defmodule DocusignEx.Request do
   @spec create_error(String.t(), String.t()) :: map()
   def create_error(error, error_description) do
     %{error: error, description: error_description}
+  end
+
+  @doc """
+  If the Request is valid then it returns {:ok, body}, if not it
+  will return an {:error, error} tuple.
+  """
+  @spec unwrap_response(__MODULE__.t()) :: {:ok, any()} | {:error, map()}
+  def unwrap_response(%__MODULE__{valid?: true} = request) do
+    {:ok, request.response}
+  end
+
+  def unwrap_response(%__MODULE__{} = request) do
+    {:error, request.error}
   end
 end

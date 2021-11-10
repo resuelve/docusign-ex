@@ -30,9 +30,8 @@ defmodule DocusignEx.Envelope do
 
     auth_config
     |> Request.new("envelopes")
-    |> Request.set_expected_status_code(201)
     |> Request.post(envelope)
-    |> parse_response()
+    |> Request.unwrap_response()
   end
 
   @doc """
@@ -47,7 +46,7 @@ defmodule DocusignEx.Envelope do
       |> Request.new("/envelopes/#{envelope_uid}/recipients")
       |> Request.add_query_param("resend_envelope", true)
       |> Request.put(signers)
-      |> parse_response()
+      |> Request.unwrap_response()
     end
   end
 
@@ -57,7 +56,7 @@ defmodule DocusignEx.Envelope do
     auth_config
     |> Request.new("/envelopes/#{envelope_uid}/recipients")
     |> Request.get()
-    |> parse_response()
+    |> Request.unwrap_response()
   end
 
   @doc """
@@ -76,7 +75,7 @@ defmodule DocusignEx.Envelope do
     auth_config
     |> Request.new("/envelopes/#{envelope_uid}")
     |> Request.put(data)
-    |> parse_response()
+    |> Request.unwrap_response()
   end
 
   @doc """
@@ -87,7 +86,7 @@ defmodule DocusignEx.Envelope do
     auth_config
     |> Request.new("/envelopes/#{envelope_uid}")
     |> Request.get()
-    |> parse_response()
+    |> Request.unwrap_response()
   end
 
   @doc """
@@ -98,27 +97,18 @@ defmodule DocusignEx.Envelope do
     auth_config
     |> Request.new("/envelopes/#{envelope_uid}/documents")
     |> Request.get()
-    |> parse_response()
+    |> Request.unwrap_response()
   end
 
   @doc """
   Devuelve el stream de datos de un documento
   """
-  @spec download_document(Config.t(), String.t(), String.t()) :: Request.json_api_response()
+  @spec download_document(Config.t(), String.t(), String.t()) :: Request.api_response()
   def download_document(auth_config, envelope_uid, document_id) do
     auth_config
     |> Request.new("/envelopes/#{envelope_uid}/documents/#{document_id}")
     |> Request.set_response_type("binary")
     |> Request.get()
-    |> parse_response()
-  end
-
-  @spec parse_response(Request.t()) :: {:ok, any()} | {:error, any()}
-  defp parse_response(%Request{valid?: true} = request) do
-    {:ok, request.response}
-  end
-
-  defp parse_response(%Request{} = request) do
-    {:error, request.error}
+    |> Request.unwrap_response()
   end
 end
