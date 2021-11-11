@@ -76,7 +76,7 @@ defmodule DocusignEx.Request do
 
   @spec set_expected_status_code(__MODULE__.t(), integer()) :: __MODULE__.t()
   def set_expected_status_code(%__MODULE__{} = request, status_code) do
-    %{request | status_code: status_code}
+    %{request | expected_status_code: status_code}
   end
 
   @spec set_response_type(__MODULE__.t(), String.t()) :: __MODULE__.t()
