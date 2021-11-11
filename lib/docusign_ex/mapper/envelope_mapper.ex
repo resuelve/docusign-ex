@@ -15,6 +15,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
     envelope = %{"status" => "sent"}
 
     envelope
+    |> add_brand(envelope_data)
     |> add_subject(envelope_data)
     |> add_documents(envelope_data)
     |> add_signers(envelope_data)
@@ -22,6 +23,11 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
     |> add_reply_to(envelope_data)
     |> add_email_body(envelope_data)
     |> add_carbon_copies(envelope_data)
+  end
+
+  def add_brand(envelope, data) do
+    brand_id = Map.get(data, "brand_id")
+    Map.put(envelope, "brandId", brand_id)
   end
 
   @doc """

@@ -1,11 +1,13 @@
-defmodule DocusignEx.Api.EnvelopeTest do
+defmodule DocusignEx.EnvelopeTest do
   use ExUnit.Case
 
   import Mock
-  alias DocusignEx.Api.Envelope
+  alias DocusignEx.Envelope
+  alias DocusignEx.Auth.Config
 
   setup do
     [
+      auth: Config.new("user", "pwd", "key") |> Config.set_base_url("https://test.resuelve.test"),
       json: %{
         "subject" => "Test",
         "signers" => [
@@ -61,106 +63,100 @@ defmodule DocusignEx.Api.EnvelopeTest do
   test "send_envelope/1 returns ok response", data do
     with_mocks([
       {
-        DocusignEx.Api.Base,
+        Mojito,
         [],
         [
-          post: fn _, _ ->
+          post: fn _, _, _, _ ->
             {:ok,
-             %HTTPoison.Response{body: %{"envelopeId" => "123"}, headers: [], status_code: 201}}
+             %Mojito.Response{body: Jason.encode!(%{"envelopeId" => "123"}), status_code: 200}}
           end
         ]
       }
     ]) do
-      assert Envelope.send_envelope(data.json) == {:ok, %{"envelopeId" => "123"}}
+      assert Envelope.send_envelope(data.auth, data.json) == {:ok, %{"envelopeId" => "123"}}
     end
   end
 
   test "send_envelope/1 returns error response", data do
+    body =
+      Jason.encode!(%{
+        "errorCode" => "INVALID_EMAIL_ADDRESS_FOR_RECIPIENT",
+        "message" => "The email address for the recipient is invalid. The recipient Id follows."
+      })
+
     with_mocks([
       {
-        DocusignEx.Api.Base,
+        Mojito,
         [],
         [
-          post: fn _, _ ->
-            {:ok,
-             %HTTPoison.Response{
-               body: %{
-                 "errorCode" => "INVALID_EMAIL_ADDRESS_FOR_RECIPIENT",
-                 "message" =>
-                   "The email address for the recipient is invalid. The recipient Id follows."
-               },
-               headers: [],
-               status_code: 400
-             }}
+          post: fn _, _, _, _ ->
+            {:ok, %Mojito.Response{body: body, status_code: 400}}
           end
         ]
       }
     ]) do
-      assert Envelope.send_envelope(data.json) ==
+      assert Envelope.send_envelope(data.auth, data.json) ==
                {:error,
                 %{
-                  "errorCode" => "INVALID_EMAIL_ADDRESS_FOR_RECIPIENT",
-                  "message" =>
+                  error: "INVALID_EMAIL_ADDRESS_FOR_RECIPIENT",
+                  description:
                     "The email address for the recipient is invalid. The recipient Id follows."
                 }}
     end
   end
 
-  test "update_envelope/2 updates the envelope status" do
+  test "update_envelope/2 updates the envelope status", data do
+    body =
+      Jason.encode!(%{
+        "errorCode" => "",
+        "message" => "SUCCESS"
+      })
+
     with_mocks([
       {
-        DocusignEx.Api.Base,
+        Mojito,
         [],
         [
-          put: fn _, _ ->
-            {:ok,
-             %HTTPoison.Response{
-               body: %{
-                 "errorCode" => "",
-                 "message" => "SUCCESS"
-               },
-               headers: [],
-               status_code: 200
-             }}
+          put: fn _, _, _, _ ->
+            {:ok, %Mojito.Response{body: body, status_code: 200}}
           end
         ]
       }
     ]) do
-      assert Envelope.update_envelope("SOME-UID", %{
+      assert Envelope.update_envelope(data.auth, "SOME-UID", %{
                "status" => "voided",
                "voidedReason" => "The reason for voiding the envelope"
              }) == {:ok, %{"errorCode" => "", "message" => "SUCCESS"}}
     end
   end
 
-  test "update_envelope/2 returns docusign error code fro 400 status code" do
+  test "update_envelope/2 returns docusign error code fro 400 status code", data do
     docusign_error_code = "ENVELOPE_CANNOT_VOID_INVALID_STATE"
-    docusign_error_message = "Only envelopes in the 'Sent' or 'Delivered' states may be voided."
+
+    body =
+      Jason.encode!(%{
+        "errorCode" => docusign_error_code,
+        "message" => "Only envelopes in the 'Sent' or 'Delivered' states may be voided."
+      })
 
     with_mocks([
       {
-        DocusignEx.Api.Base,
+        Mojito,
         [],
         [
-          put: fn _, _ ->
-            {:ok,
-             %HTTPoison.Response{
-               body: %{
-                 "errorCode" => docusign_error_code,
-                 "message" => docusign_error_message
-               },
-               headers: [],
-               status_code: 400
-             }}
+          put: fn _, _, _, _ ->
+            {:ok, %Mojito.Response{body: body, status_code: 400}}
           end
         ]
       }
     ]) do
-      assert Envelope.update_envelope("SOME-UID", %{
-               "status" => "voided",
-               "voidedReason" => "The reason for voiding the envelope"
-             }) ==
-               {:error, docusign_error_code}
+      {:error, error} =
+        Envelope.update_envelope(data.auth, "SOME-UID", %{
+          "status" => "voided",
+          "voidedReason" => "The reason for voiding the envelope"
+        })
+
+      assert error.error == docusign_error_code
     end
   end
 end
