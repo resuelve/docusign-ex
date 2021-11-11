@@ -73,10 +73,12 @@ defmodule DocusignEx.Mapper.EnvelopeMapperTest do
             }
           ]
         },
+        "brandId" => "someUID",
         "status" => "sent",
         "eventNotification" => nil
       },
       json: %{
+        "brand_id" => "someUID",
         "subject" => "Test",
         "signers" => [
           %{
