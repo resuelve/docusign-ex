@@ -6,7 +6,11 @@ defmodule DocusignEx.AuthTest do
   alias DocusignEx.Auth
 
   test "Should create an Auth Config" do
-    assert %Auth.Config{username: username, password: password, integrator_key: key} ==
+    username = "test"
+    password = "secret"
+    key = "key"
+
+    assert %Auth.Config{username: ^username, password: ^password, integrator_key: ^key} =
              Auth.config(username, password, key)
   end
 
@@ -16,13 +20,17 @@ defmodule DocusignEx.AuthTest do
     assert auth_config.base_url == nil
 
     with_mock Mojito,
-      get: fn _, _ ->
-        response =
+      get: fn _, _, _ ->
+        body =
           Jason.encode!(%{
-            base_url: "some_fake_base_url"
+            "loginAccounts" => [
+              %{
+                "baseUrl" => ""
+              }
+            ]
           })
 
-        {:ok, %{status_code: 200, response: response}}
+        {:ok, %{status_code: 200, body: body}}
       end do
       {:ok, login_config} = Auth.login(auth_config)
       assert login_config.base_url != nil
