@@ -9,7 +9,8 @@ defmodule DocusignEx.Mixfile do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
@@ -21,7 +22,14 @@ defmodule DocusignEx.Mixfile do
     [
       {:mojito, "~> 0.7.10"},
       {:jason, "~> 1.2"},
-      {:mock, "~> 0.3.7", only: :test}
+      {:mock, "~> 0.3.7", only: :test},
+      {:excoveralls, "~> 0.13.3", only: :test}
+    ]
+  end
+
+  defp aliases do
+    [
+      ci: ["format --check-formatted", "test --cover"]
     ]
   end
 end
