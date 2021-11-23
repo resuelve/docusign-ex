@@ -8,53 +8,20 @@ defmodule DocusignEx.EnvelopeTest do
   setup do
     [
       auth: Config.new("user", "pwd", "key") |> Config.set_base_url("https://test.resuelve.test"),
-      json: %{
-        "subject" => "Test",
-        "signers" => [
+      envelope: %Envelope{
+        email_subject: "Test",
+        webhook_url: "localhost",
+        signers: [
           %{
-            "name" => "Name",
-            "email" => "email@email.com",
-            "documents" => [
-              %{
-                "path" => "test/utils/test64.txt",
-                "tabs" => %{
-                  "dateSignedTabs" => [
-                    %{
-                      "xPosition" => "32",
-                      "yPosition" => "75",
-                      "pageNumber" => "1"
-                    },
-                    %{
-                      "xPosition" => "62",
-                      "yPosition" => "10",
-                      "pageNumber" => "1"
-                    }
-                  ],
-                  "fullNameTabs" => [
-                    %{
-                      "xPosition" => "10",
-                      "yPosition" => "100",
-                      "pageNumber" => "1"
-                    }
-                  ],
-                  "signHereTabs" => [
-                    %{
-                      "xPosition" => "25",
-                      "yPosition" => "62",
-                      "pageNumber" => "1"
-                    }
-                  ],
-                  "initialHereTabs" => [
-                    %{
-                      "xPosition" => "20",
-                      "yPosition" => "20",
-                      "pageNumber" => "1"
-                    }
-                  ]
-                }
-              }
+            name: "Name",
+            email: "email@email.com",
+            tabs: [
+              %{key: "signHereTabs", x_offset: 10, y_offset: 100, string: "SIGN_HERE"}
             ]
           }
+        ],
+        documents: [
+          %{filename: "test.txt", content: "text"}
         ]
       }
     ]
@@ -68,12 +35,12 @@ defmodule DocusignEx.EnvelopeTest do
         [
           post: fn _, _, _, _ ->
             {:ok,
-             %Mojito.Response{body: Jason.encode!(%{"envelopeId" => "123"}), status_code: 200}}
+             %Mojito.Response{body: Jason.encode!(%{"envelopeId" => "123"}), status_code: 201}}
           end
         ]
       }
     ]) do
-      assert Envelope.send_envelope(data.auth, data.json) == {:ok, %{"envelopeId" => "123"}}
+      assert Envelope.send_envelope(data.auth, data.envelope) == {:ok, %{"envelopeId" => "123"}}
     end
   end
 
@@ -95,7 +62,7 @@ defmodule DocusignEx.EnvelopeTest do
         ]
       }
     ]) do
-      assert Envelope.send_envelope(data.auth, data.json) ==
+      assert Envelope.send_envelope(data.auth, data.envelope) ==
                {:error,
                 %{
                   error: "INVALID_EMAIL_ADDRESS_FOR_RECIPIENT",

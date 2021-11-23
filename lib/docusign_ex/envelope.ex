@@ -8,15 +8,46 @@ defmodule DocusignEx.Envelope do
 
   require Logger
 
+  @enforce_keys [:email_subject, :signers, :webhook_url, :documents]
+  defstruct @enforce_keys ++ [:brand_id]
+
+  @type document :: %{
+          filename: String.t(),
+          content: iodata
+        }
+
+  @type tab :: %{
+          key: String.t(),
+          string: String.t(),
+          x_offset: integer,
+          y_offset: integer
+        }
+
+  @type signer :: %{
+          name: String.t(),
+          email: String.t(),
+          lang: String.t(),
+          tabs: [tab]
+        }
+
+  @type t :: %{
+          subject: String.t(),
+          brand_id: String.t(),
+          webhook_url: String.t(),
+          signers: [signer],
+          documents: [document]
+        }
+
   @doc """
   Envia un documento para que el remitente pueda firmarlo.
 
   ## Ejemplos:
-      iex> data = %{
-        "subject" => "Test",
-        "signers" => [...]
+      iex> data = %Envelope{
+        email_subject: "Test",
+        documents: [...],
+        signers: [...]
       }
-      iex> DocusignEx.Api.Envelope.send_envelope(data)
+      iex> DocusignEx.Envelope.send_envelope(auth_config, data)
       %{
         "envelopeId" => "5aadc814-53be-4a03-8590-6cf381faa163",
         "status" => "sent",
@@ -25,13 +56,13 @@ defmodule DocusignEx.Envelope do
       }
   """
   @spec send_envelope(Config.t(), map) :: Request.json_api_response()
-  def send_envelope(auth_config, envelope_data) do
-    envelope = EnvelopeMapper.map(envelope_data)
+  def send_envelope(auth_config, %__MODULE__{} = envelope) do
+    payload = EnvelopeMapper.build_payload(envelope)
 
     auth_config
     |> Request.new("envelopes")
     |> Request.set_expected_status_code(201)
-    |> Request.post(envelope)
+    |> Request.post(payload)
     |> Request.unwrap_response()
   end
 
