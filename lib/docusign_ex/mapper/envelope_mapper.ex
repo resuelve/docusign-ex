@@ -66,7 +66,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
       "emailNotification" => %{
         "supportedLanguage" => Map.get(signer, :lang, @signer_default_lang)
       },
-      "name" => signer.email,
+      "name" => signer.name,
       "recipientId" => order,
       "routingOrder" => order,
       "tabs" =>
