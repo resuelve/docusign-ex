@@ -119,6 +119,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
             "routingOrder" => acc,
             "tabs" => tabs,
             "emailNotification" => %{
+              "emailSubject" => Map.get(envelope, "emailSubject"),
               "supportedLanguage" => Map.get(signer, "lang", @signer_default_lang)
             }
           },
